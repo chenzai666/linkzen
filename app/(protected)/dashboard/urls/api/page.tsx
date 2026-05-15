@@ -2,15 +2,11 @@ import { redirect } from "next/navigation";
 
 import { getCurrentUser } from "@/lib/session";
 import { constructMetadata } from "@/lib/utils";
-import { DashboardHeader } from "@/components/dashboard/header";
 import ApiReference from "@/components/shared/api-reference";
 
-import { CodeLight } from "../../scrape/scrapes";
-import LiveLog from "../live-logs";
-
 export const metadata = constructMetadata({
-  title: "Live Logs",
-  description: "Display link's real-time live logs.",
+  title: "API Reference",
+  description: "Short URLs API reference.",
 });
 
 export default async function DashboardPage() {
@@ -25,9 +21,8 @@ export default async function DashboardPage() {
         target="creating short urls"
         link="/docs/short-urls#api-reference"
       />
-      <CodeLight
-        content={`
-curl -X POST \\
+      <pre className="rounded-lg bg-muted p-4 text-sm overflow-x-auto">
+{`curl -X POST \\
   -H "Content-Type: application/json" \\
   -H "wrdo-api-key: YOUR_API_KEY" \\
   -d '{
@@ -39,9 +34,8 @@ curl -X POST \\
     "active": 1,
     "password": ""
   }' \\
-  https://wr.do/api/v1/short
-        `}
-      />
+  https://your-domain/api/v1/short`}
+      </pre>
     </>
   );
 }
