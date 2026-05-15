@@ -2,7 +2,18 @@ import { useState } from "react";
 import Link from "next/link";
 
 import { cn } from "@/lib/utils";
-import { MetaScrapingProps } from "@/app/(protected)/dashboard/scrape/scrapes";
+
+interface MetaScrapingProps {
+  title: string;
+  description: string;
+  image: string;
+  icon: string;
+  url: string;
+  lang: string;
+  author: string;
+  timestamp: string;
+  payload: string;
+}
 
 import { Skeleton } from "../ui/skeleton";
 import {
