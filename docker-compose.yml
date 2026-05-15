@@ -1,29 +1,29 @@
 services:
   app:
-    image: ghcr.io/chenzai666/wr.do/wrdo:${TAG:-slim}
-    container_name: wrdo
+    image: bats666/linkzen:${TAG:-latest}
+    container_name: linkzen
     ports:
-      - "${PORT:-3000}:3000"
+      - "${PORT:-13000}:3000"
     environment:
       NODE_ENV: production
-      DATABASE_URL: file:/app/data/wrdo.db
+      DATABASE_URL: file:/app/data/linkzen.db
       AUTH_SECRET: ${AUTH_SECRET}
-      AUTH_URL: ${AUTH_URL:-http://localhost:3000}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
-      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-wr.do}
+      AUTH_URL: ${AUTH_URL:-http://localhost:13000}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:13000}
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-LinkZen}
       SKIP_DB_CHECK: "false"
       SKIP_DB_MIGRATION: "false"
     volumes:
-      - wrdo_data:/app/data
+      - linkzen_data:/app/data
     networks:
-      - wrdo-network
+      - linkzen-network
     restart: unless-stopped
 
 volumes:
-  wrdo_data:
-    name: wrdo_data
+  linkzen_data:
+    name: linkzen_data
     driver: local
 
 networks:
-  wrdo-network:
+  linkzen-network:
     driver: bridge

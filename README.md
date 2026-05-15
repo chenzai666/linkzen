@@ -1,19 +1,18 @@
 <div align="center">
-  <h1>WR.DO Slim</h1>
-  <p>精简版域名服务平台，专注短链接管理与 DNS 子域名管理，自托管部署，SQLite 数据库。</p>
+  <h1>LinkZen</h1>
+  <p>精简版短链接与 DNS 子域名管理平台，SQLite 数据库，自托管部署，开箱即用。</p>
   <p>
-    基于 <a href="https://github.com/oiov/wr.do">oiov/wr.do</a> Fork · <a href="/README-en.md">English</a> | 简体中文
+    基于 <a href="https://github.com/oiov/wr.do">oiov/wr.do</a> 精简 Fork
   </p>
-  <img alt="Build" src="https://img.shields.io/github/actions/workflow/status/chenzai666/wr.do/docker-build-push.yml?label=build&labelColor=black&logo=githubactions&logoColor=white&style=flat-square">
+  <img alt="Build" src="https://img.shields.io/github/actions/workflow/status/chenzai666/linkzen/docker-build-push.yml?label=build&labelColor=black&logo=githubactions&logoColor=white&style=flat-square">
+  <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/bats666/linkzen?labelColor=black&style=flat-square">
   <img src="https://img.shields.io/github/license/oiov/wr.do?style=flat-square" alt="MIT"/>
 </div>
 
 ## 与原版的区别
 
-本仓库是 [oiov/wr.do](https://github.com/oiov/wr.do) 的精简 Fork，去除了臃肿的功能，专注核心用途：
-
-| 功能 | 原版 | 本版 |
-|------|------|------|
+| 功能 | 原版 | LinkZen |
+|------|------|---------|
 | 短链接管理 | ✅ | ✅ |
 | DNS 子域名管理 | ✅ | ✅ |
 | 管理员面板 | ✅ | ✅ |
@@ -55,34 +54,28 @@
 
 ## Docker 快速部署
 
-### 1. 创建目录和配置文件
-
-```bash
-mkdir wrdo && cd wrdo
-```
-
-新建 `docker-compose.yml`：
+### 1. 创建 docker-compose.yml
 
 ```yaml
 services:
   app:
-    image: ghcr.io/chenzai666/wr.do/wrdo:slim
-    container_name: wrdo
+    image: bats666/linkzen:latest
+    container_name: linkzen
     ports:
-      - "3000:3000"
+      - "13000:3000"
     environment:
       NODE_ENV: production
-      DATABASE_URL: file:/app/data/wrdo.db
-      AUTH_SECRET: "your-strong-secret-key"          # 必填，随机字符串
-      AUTH_URL: "http://your-domain:3000"             # 必填，改为实际访问地址
-      NEXT_PUBLIC_APP_URL: "http://your-domain:3000"  # 必填，改为实际访问地址
-      NEXT_PUBLIC_APP_NAME: "WR.DO"
+      DATABASE_URL: file:/app/data/linkzen.db
+      AUTH_SECRET: "your-strong-secret-key"           # 必填，随机字符串
+      AUTH_URL: "http://your-domain:13000"             # 必填，改为实际访问地址
+      NEXT_PUBLIC_APP_URL: "http://your-domain:13000"  # 必填，改为实际访问地址
+      NEXT_PUBLIC_APP_NAME: "LinkZen"
     volumes:
-      - wrdo_data:/app/data
+      - linkzen_data:/app/data
     restart: unless-stopped
 
 volumes:
-  wrdo_data:
+  linkzen_data:
     driver: local
 ```
 
@@ -92,50 +85,33 @@ volumes:
 docker compose up -d
 ```
 
-### 3. 创建管理员账号
+### 3. 初始化管理员
 
-服务启动后访问 `http://your-domain:3000/setup` 完成管理员初始化。
-
-或进入容器手动操作数据库：
-
-```bash
-docker exec -it wrdo sh
-```
+服务启动后访问 `http://your-domain:13000/setup` 完成管理员账号初始化。
 
 ---
 
 ## 本地开发
 
 ```bash
-git clone https://github.com/chenzai666/wr.do
-cd wr.do
-git checkout slim
+git clone https://github.com/chenzai666/linkzen
+cd linkzen
 pnpm install
-```
-
-复制环境变量：
-
-```bash
 cp .env.example .env
 # 编辑 .env 填入必要变量
-```
-
-初始化数据库并启动：
-
-```bash
 pnpm db:push
 pnpm dev
 ```
 
-## 环境变量说明
+## 环境变量
 
 | 变量 | 必填 | 说明 |
 |------|------|------|
-| `DATABASE_URL` | ✅ | SQLite 路径，如 `file:./data/wrdo.db` |
+| `DATABASE_URL` | ✅ | SQLite 路径，如 `file:./data/linkzen.db` |
 | `AUTH_SECRET` | ✅ | JWT 密钥，随机字符串即可 |
 | `AUTH_URL` | ✅ | 服务访问地址（含协议和端口） |
 | `NEXT_PUBLIC_APP_URL` | ✅ | 同上，用于前端 |
-| `NEXT_PUBLIC_APP_NAME` | ❌ | 站点名称，默认 `wr.do` |
+| `NEXT_PUBLIC_APP_NAME` | ❌ | 站点名称，默认 `LinkZen` |
 
 DNS 功能还需在管理员面板中配置 Cloudflare API Key。
 

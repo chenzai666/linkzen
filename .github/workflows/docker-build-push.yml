@@ -1,66 +1,48 @@
-name: Build and Push Docker Image to GHCR
+name: 构建并推送 Docker 镜像到 Docker Hub
 
 on:
   push:
     branches:
       - main
-      - dev
-      - slim
     tags:
       - "v*.*.*"
-  pull_request:
-    branches:
-      - main
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/wrdo
+  IMAGE_NAME: bats666/linkzen
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
 
     steps:
-      # 检出代码
-      - name: Checkout repository
+      - name: 检出代码
         uses: actions/checkout@v4
 
-      # 设置 Docker Buildx（支持多平台构建）
-      - name: Set up Docker Buildx
+      - name: 设置 Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # 登录到 GitHub Container Registry
-      - name: Log in to GitHub Container Registry
+      - name: 登录 Docker Hub
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: bats666
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 提取 Docker 镜像元数据（标签、版本等）
-      - name: Extract Docker metadata
+      - name: 提取镜像元数据
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.IMAGE_NAME }}
           tags: |
-            type=sha,format=short  
-            type=ref,event=branch,prefix=  
+            type=raw,value=latest,enable={{is_default_branch}}
             type=ref,event=tag
 
-      # 构建并推送 Docker 镜像
-      - name: Build and push Docker image
+      - name: 构建并推送
         uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
-          push: true # ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            ENVIRONMENT=${{ github.event.inputs.environment || 'production' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
