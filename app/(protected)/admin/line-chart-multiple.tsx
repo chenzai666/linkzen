@@ -1,6 +1,5 @@
 "use client";
 
-import { ScrapeMeta } from "@prisma/client";
 import { useTranslations } from "next-intl";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
@@ -18,7 +17,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-const processChartData = (data: ScrapeMeta[], type1: string, type2: string) => {
+const processChartData = (data: any[], type1: string, type2: string) => {
   const aggregatedData: Record<
     string,
     { date: string; source1: number; source2: number }
@@ -46,7 +45,7 @@ const processChartData = (data: ScrapeMeta[], type1: string, type2: string) => {
 };
 
 interface LineChartMultipleProps {
-  chartData: ScrapeMeta[];
+  chartData: any[];
   type1: string;
   type2: string;
 }

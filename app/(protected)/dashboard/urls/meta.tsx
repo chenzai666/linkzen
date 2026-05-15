@@ -17,12 +17,11 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyPlaceholder } from "@/components/shared/empty-placeholder";
-import { Icons } from "@/components/shared/icons";
 
 import { DailyPVUVChart } from "./meta-chart";
 
 export interface UrlMetaProps {
-  user: Pick<User, "id" | "name" | "team">;
+  user: Pick<User, "id" | "name">;
   action: string;
   urlId: string;
 }
@@ -33,12 +32,7 @@ export default function UserUrlMetaInfo({ user, action, urlId }: UrlMetaProps) {
   const { data, isLoading } = useSWR<UrlMeta[]>(
     `${action}?id=${urlId}&range=${timeRange}`,
     fetcher,
-    { focusThrottleInterval: 30000 }, // 30 seconds,
-  );
-
-  const { data: plan } = useSWR<{ slAnalyticsRetention: number }>(
-    `/api/plan?team=${user.team}`,
-    fetcher,
+    { focusThrottleInterval: 30000 },
   );
 
   if (isLoading)
@@ -55,43 +49,30 @@ export default function UserUrlMetaInfo({ user, action, urlId }: UrlMetaProps) {
         <EmptyPlaceholder.Description>
           {t("You don't have any visits yet in")}{" "}
           {t(
-            DATE_DIMENSION_ENUMS.find((e) => e.value === timeRange)?.label ||
-              "",
+            DATE_DIMENSION_ENUMS.find((e) => e.value === timeRange)?.label || "",
           )}
           .
-          {plan && (
-            <Select
-              onValueChange={(value: string) => {
-                setTimeRange(value);
-              }}
-              name="time range"
-              defaultValue={timeRange}
-            >
-              <SelectTrigger className="mt-4 w-full shadow-inner">
-                <SelectValue placeholder="Select a time" />
-              </SelectTrigger>
-              <SelectContent>
-                {DATE_DIMENSION_ENUMS.map((e, i) => (
-                  <div key={e.value}>
-                    <SelectItem
-                      disabled={e.key > plan.slAnalyticsRetention}
-                      value={e.value}
-                    >
-                      <span className="flex items-center gap-1">
-                        {t(e.label)}
-                        {e.key > plan.slAnalyticsRetention && (
-                          <Icons.crown className="size-3" />
-                        )}
-                      </span>
-                    </SelectItem>
-                    {i % 2 === 0 && i !== DATE_DIMENSION_ENUMS.length - 1 && (
-                      <SelectSeparator />
-                    )}
-                  </div>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <Select
+            onValueChange={(value: string) => setTimeRange(value)}
+            name="time range"
+            defaultValue={timeRange}
+          >
+            <SelectTrigger className="mt-4 w-full shadow-inner">
+              <SelectValue placeholder="Select a time" />
+            </SelectTrigger>
+            <SelectContent>
+              {DATE_DIMENSION_ENUMS.map((e, i) => (
+                <div key={e.value}>
+                  <SelectItem value={e.value}>
+                    <span className="flex items-center gap-1">{t(e.label)}</span>
+                  </SelectItem>
+                  {i % 2 === 0 && i !== DATE_DIMENSION_ENUMS.length - 1 && (
+                    <SelectSeparator />
+                  )}
+                </div>
+              ))}
+            </SelectContent>
+          </Select>
         </EmptyPlaceholder.Description>
       </EmptyPlaceholder>
     );

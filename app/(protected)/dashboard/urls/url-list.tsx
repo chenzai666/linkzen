@@ -68,7 +68,7 @@ import { UrlExporter } from "./export";
 import UserUrlMetaInfo from "./meta";
 
 export interface UrlListProps {
-  user: Pick<User, "id" | "name" | "apiKey" | "role" | "team">;
+  user: Pick<User, "id" | "name" | "apiKey" | "role">;
   action: string;
 }
 
@@ -314,7 +314,6 @@ export default function UserUrlsList({ user, action }: UrlListProps) {
         user={{
           id: user.id,
           name: user.name || "",
-          team: user.team,
         }}
         action="/api/url/meta"
         urlId={short.id!}
@@ -762,7 +761,7 @@ export default function UserUrlsList({ user, action }: UrlListProps) {
       >
         {selectedUrl && (
           <QRCodeEditor
-            user={{ id: user.id, apiKey: user.apiKey || "", team: user.team! }}
+            user={{ id: user.id, apiKey: user.apiKey || "" }}
             url={`https://${selectedUrl.prefix}/${selectedUrl.url}`}
           />
         )}

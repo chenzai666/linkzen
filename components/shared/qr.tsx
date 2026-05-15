@@ -42,7 +42,7 @@ export default function QRCodeEditor({
   user,
   url,
 }: {
-  user: { id: string; apiKey: string; team: string };
+  user: { id: string; apiKey: string };
   url: string;
 }) {
   const t = useTranslations("List");

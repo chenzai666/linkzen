@@ -6,9 +6,7 @@ export async function POST(req: Request) {
     const user = checkUserStatus(await getCurrentUser());
     if (user instanceof Response) return user;
     if (user.role !== "ADMIN") {
-      return Response.json("Unauthorized", {
-        status: 401,
-      });
+      return Response.json("Unauthorized", { status: 401 });
     }
 
     const { id, data } = await req.json();
@@ -18,15 +16,11 @@ export async function POST(req: Request) {
       email: data.email,
       role: data.role,
       active: data.active,
-      team: data.team,
-      image: data.image,
       apiKey: data.apiKey,
       password: data.password,
     });
     if (!res?.id) {
-      return Response.json("An error occurred", {
-        status: 400,
-      });
+      return Response.json("An error occurred", { status: 400 });
     }
     return Response.json("success");
   } catch (error) {

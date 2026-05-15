@@ -13,7 +13,7 @@ import UserUrlsList from "./url-list";
 export function Wrapper({
   user,
 }: {
-  user: Pick<User, "id" | "name" | "apiKey" | "role" | "team">;
+  user: Pick<User, "id" | "name" | "apiKey" | "role">;
 }) {
   const [tab, setTab] = useState("Links");
   return (
@@ -38,7 +38,6 @@ export function Wrapper({
             name: user.name || "",
             apiKey: user.apiKey || "",
             role: user.role,
-            team: user.team,
           }}
           action="/api/url"
         />

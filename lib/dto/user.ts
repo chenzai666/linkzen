@@ -5,7 +5,7 @@ import { prisma } from "@/lib/db";
 import { hashPassword, verifyPassword } from "../utils";
 
 export interface UpdateUserForm
-  extends Omit<User, "id" | "createdAt" | "updatedAt" | "emailVerified"> {}
+  extends Omit<User, "id" | "createdAt" | "updatedAt"> {}
 
 export const getUserByEmail = async (email: string) => {
   try {
@@ -16,9 +16,7 @@ export const getUserByEmail = async (email: string) => {
       select: {
         id: true,
         name: true,
-        emailVerified: true,
         active: true,
-        team: true,
       },
     });
 
@@ -144,8 +142,6 @@ export const updateUser = async (userId: string, data: UpdateUserForm) => {
     }
     if (data.role !== undefined) updateData.role = data.role;
     if (data.active !== undefined) updateData.active = data.active;
-    if (data.team !== undefined) updateData.team = data.team;
-    if (data.image !== undefined) updateData.image = data.image;
     if (data.apiKey !== undefined) updateData.apiKey = data.apiKey;
 
     // 4. 处理密码更新
@@ -179,8 +175,6 @@ export const updateUser = async (userId: string, data: UpdateUserForm) => {
         email: true,
         role: true,
         active: true,
-        team: true,
-        image: true,
         apiKey: true,
         createdAt: true,
         updatedAt: true,

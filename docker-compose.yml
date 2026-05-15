@@ -1,34 +1,28 @@
 services:
   app:
-    image: ghcr.io/oiov/wr.do/wrdo:${TAG:-main}
+    image: ghcr.io/chenzai666/wr.do/wrdo:${TAG:-slim}
     container_name: wrdo
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:3000"
     environment:
       NODE_ENV: production
-      DATABASE_URL: ${DATABASE_URL}
-      AUTH_SECRET: ${AUTH_SECRET:-your-auth-secret}
-      AUTH_URL: ${AUTH_URL}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      GITHUB_ID: ${GITHUB_ID}
-      GITHUB_SECRET: ${GITHUB_SECRET}
-      LinuxDo_CLIENT_ID: ${LinuxDo_CLIENT_ID}
-      LinuxDo_CLIENT_SECRET: ${LinuxDo_CLIENT_SECRET}
-      RESEND_API_KEY: ${RESEND_API_KEY}
-      BREVO_API_KEY: ${BREVO_API_KEY}
-      EMAIL_FROM: ${EMAIL_FROM}
-      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME}
-      NEXT_PUBLIC_EMAIL_R2_DOMAIN: ${NEXT_PUBLIC_EMAIL_R2_DOMAIN}
-      NEXT_PUBLIC_GOOGLE_ID: ${NEXT_PUBLIC_GOOGLE_ID}
-      SCREENSHOTONE_BASE_URL: ${SCREENSHOTONE_BASE_URL}
-      GITHUB_TOKEN: ${GITHUB_TOKEN}
-      SKIP_DB_CHECK: ${SKIP_DB_CHECK}
-      SKIP_DB_MIGRATION: ${SKIP_DB_MIGRATION}
+      DATABASE_URL: file:/app/data/wrdo.db
+      AUTH_SECRET: ${AUTH_SECRET}
+      AUTH_URL: ${AUTH_URL:-http://localhost:3000}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+      NEXT_PUBLIC_APP_NAME: ${NEXT_PUBLIC_APP_NAME:-wr.do}
+      SKIP_DB_CHECK: "false"
+      SKIP_DB_MIGRATION: "false"
+    volumes:
+      - wrdo_data:/app/data
     networks:
       - wrdo-network
     restart: unless-stopped
+
+volumes:
+  wrdo_data:
+    name: wrdo_data
+    driver: local
 
 networks:
   wrdo-network:

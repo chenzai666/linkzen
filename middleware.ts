@@ -28,21 +28,12 @@ const redirectMap = {
 };
 
 const systemRoutes = [
-  "/docs",
   "/dashboard",
   "/admin",
-  "/feedback",
-  "/pricing",
-  "/plan",
-  "/privacy",
-  "/terms",
   "/auth",
   "/login",
-  "/register",
-  "/emails",
   "/link-status",
   "/password-prompt",
-  "/chat",
   "/manifest.json",
   "/robots.txt",
   "/opengraph-image.jpg",

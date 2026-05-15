@@ -5,7 +5,6 @@ import {
   getUserRecordCount,
 } from "@/lib/dto/cloudflare-dns-record";
 import { getDomainsByFeature } from "@/lib/dto/domains";
-import { getPlanQuota } from "@/lib/dto/plan";
 import { checkUserStatus, getUserByEmail } from "@/lib/dto/user";
 import { getCurrentUser } from "@/lib/session";
 import { generateSecret } from "@/lib/utils";
@@ -38,10 +37,8 @@ export async function POST(req: Request) {
       });
     }
 
-    const plan = await getPlanQuota(user.team);
-
     const { total } = await getUserRecordCount(target_user.id);
-    if (total >= plan.rcNewRecords) {
+    if (total >= 1000000) {
       return Response.json("Your records have reached the free limit.", {
         status: 409,
       });

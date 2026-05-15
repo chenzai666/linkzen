@@ -1,6 +1,5 @@
 import { checkApiKey } from "@/lib/dto/api-key";
 import { getDomainsByFeature } from "@/lib/dto/domains";
-import { getPlanQuota } from "@/lib/dto/plan";
 import { createUserShortUrl } from "@/lib/dto/short-urls";
 import { restrictByTimeRange } from "@/lib/team";
 import { createUrlSchema } from "@/lib/validations/url";
@@ -23,13 +22,11 @@ export async function POST(req: Request) {
       );
     }
 
-    const plan = await getPlanQuota(user.team!);
-
-    // check limit
+    // 使用固定上限进行频率限制
     const limit = await restrictByTimeRange({
       model: "userUrl",
       userId: user.id,
-      limit: plan.slNewLinks,
+      limit: 1000000,
       rangeType: "month",
     });
     if (limit) return Response.json(limit.statusText, { status: limit.status });

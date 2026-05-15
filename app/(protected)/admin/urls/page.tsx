@@ -23,7 +23,6 @@ export default async function DashboardPage() {
           name: user.name || "",
           apiKey: user.apiKey || "",
           role: user.role,
-          team: user.team,
         }}
         action="/api/url/admin"
       />

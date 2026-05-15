@@ -46,7 +46,7 @@ export interface UrlListProps {
 
 function TableColumnSekleton({ className }: { className?: string }) {
   return (
-    <TableRow className="grid grid-cols-3 items-center sm:grid-cols-8">
+    <TableRow className="grid grid-cols-3 items-center sm:grid-cols-7">
       <TableCell className="col-span-1">
         <Skeleton className="h-5 w-20" />
       </TableCell>
@@ -191,7 +191,7 @@ export default function UsersList({ user }: UrlListProps) {
           </div>
           <Table>
             <TableHeader className="bg-gray-100/50 dark:bg-primary-foreground">
-              <TableRow className="grid grid-cols-3 items-center sm:grid-cols-8">
+              <TableRow className="grid grid-cols-3 items-center sm:grid-cols-7">
                 <TableHead className="col-span-1 flex items-center font-bold">
                   {t("Name")}
                 </TableHead>
@@ -200,9 +200,6 @@ export default function UsersList({ user }: UrlListProps) {
                 </TableHead>
                 <TableHead className="col-span-1 hidden items-center justify-center font-bold sm:flex">
                   {t("Role")}
-                </TableHead>
-                <TableHead className="col-span-1 hidden items-center justify-center font-bold sm:flex">
-                  {t("Plan")}
                 </TableHead>
                 <TableHead className="col-span-1 hidden items-center justify-center font-bold sm:flex">
                   {t("Status")}
@@ -228,7 +225,7 @@ export default function UsersList({ user }: UrlListProps) {
                 data.list.map((user) => (
                   <TableRow
                     key={user.id}
-                    className="grid animate-fade-in grid-cols-3 items-center animate-in sm:grid-cols-8"
+                    className="grid animate-fade-in grid-cols-3 items-center animate-in sm:grid-cols-7"
                   >
                     <TableCell className="col-span-1 truncate">
                       <TooltipProvider>
@@ -255,11 +252,6 @@ export default function UsersList({ user }: UrlListProps) {
                     <TableCell className="col-span-1 hidden justify-center sm:flex">
                       <Badge className="text-xs" variant="outline">
                         {t(user.role)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="col-span-1 hidden justify-center sm:flex">
-                      <Badge className="text-xs" variant="outline">
-                        {user.team}
                       </Badge>
                     </TableCell>
                     <TableCell className="col-span-1 hidden justify-center sm:flex">

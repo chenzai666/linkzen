@@ -171,18 +171,13 @@ export function DailyPVUVChart({
   data: UrlMeta[];
   timeRange: string;
   setTimeRange: React.Dispatch<React.SetStateAction<string>>;
-  user: Pick<User, "id" | "name" | "team">;
+  user: Pick<User, "id" | "name">;
 }) {
   const { ref: wrapperRef, width: wrapperWidth } = useElementSize();
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof chartConfig>("pv");
 
   const t = useTranslations("Components");
-
-  const { data: plan } = useSWR<{ slAnalyticsRetention: number }>(
-    `/api/plan?team=${user.team}`,
-    fetcher,
-  );
 
   const processedData = processUrlMeta(data).map((entry) => ({
     date: entry.date,
@@ -259,39 +254,27 @@ export function DailyPVUVChart({
           <CardDescription>{lastVisitorInfo}</CardDescription>
         </div>
         <div className="flex items-center">
-          {plan && (
-            <Select
-              onValueChange={(value: string) => {
-                setTimeRange(value);
-              }}
-              name="time range"
-              defaultValue={timeRange}
-            >
-              <SelectTrigger className="mx-4 w-full min-w-28 shadow-inner">
-                <SelectValue placeholder="Select a time" />
-              </SelectTrigger>
-              <SelectContent>
-                {DATE_DIMENSION_ENUMS.map((e, i) => (
-                  <div key={e.value}>
-                    <SelectItem
-                      disabled={e.key > plan.slAnalyticsRetention}
-                      value={e.value}
-                    >
-                      <span className="flex items-center gap-1">
-                        {t(e.label)}
-                        {e.key > plan.slAnalyticsRetention && (
-                          <Icons.crown className="size-3" />
-                        )}
-                      </span>
-                    </SelectItem>
-                    {i % 2 === 0 && i !== DATE_DIMENSION_ENUMS.length - 1 && (
-                      <SelectSeparator />
-                    )}
-                  </div>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+          <Select
+            onValueChange={(value: string) => setTimeRange(value)}
+            name="time range"
+            defaultValue={timeRange}
+          >
+            <SelectTrigger className="mx-4 w-full min-w-28 shadow-inner">
+              <SelectValue placeholder="Select a time" />
+            </SelectTrigger>
+            <SelectContent>
+              {DATE_DIMENSION_ENUMS.map((e, i) => (
+                <div key={e.value}>
+                  <SelectItem value={e.value}>
+                    <span className="flex items-center gap-1">{t(e.label)}</span>
+                  </SelectItem>
+                  {i % 2 === 0 && i !== DATE_DIMENSION_ENUMS.length - 1 && (
+                    <SelectSeparator />
+                  )}
+                </div>
+              ))}
+            </SelectContent>
+          </Select>
           {["pv", "uv"].map((key) => {
             const chart = key as keyof typeof chartConfig;
             return (

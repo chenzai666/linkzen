@@ -16,7 +16,6 @@ export const updateUserSchema = z.object({
   image: z.string(),
   name: z.string(),
   active: z.number().default(1),
-  team: z.string(),
   role: z.nativeEnum(UserRole),
   password: z.string().optional(),
 });

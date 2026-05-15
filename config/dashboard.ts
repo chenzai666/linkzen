@@ -2,8 +2,6 @@ import { UserRole } from "@prisma/client";
 
 import { SidebarNavItem } from "types";
 
-import { siteConfig } from "./site";
-
 export const sidebarLinks: SidebarNavItem[] = [
   {
     title: "MENU",
@@ -21,64 +19,6 @@ export const sidebarLinks: SidebarNavItem[] = [
         ],
       },
       { href: "/dashboard/records", icon: "globe", title: "DNS Records" },
-      {
-        href: "",
-        icon: "mail",
-        title: "Emails",
-        items: [
-          { href: "/emails", title: "Inbox" },
-          { href: "/emails/sent", title: "Sent" },
-          { href: "/emails/trash", title: "Trash", disabled: true },
-          { href: "/emails/api", title: "API", disabled: true },
-        ],
-      },
-      {
-        href: "",
-        icon: "storage",
-        title: "Cloud Storage",
-        items: [
-          { href: "/dashboard/storage", title: "Storage" },
-          {
-            href: "/dashboard/storage/analytics",
-            title: "File Analytics",
-            disabled: true,
-          },
-          { href: "/dashboard/storage/api", title: "API", disabled: true },
-        ],
-      },
-    ],
-  },
-  {
-    title: "OPEN API",
-    items: [
-      {
-        href: "/dashboard/scrape",
-        icon: "layers",
-        title: "Overview",
-      },
-      {
-        href: "",
-        icon: "bug",
-        title: "APIs",
-        items: [
-          {
-            href: "/dashboard/scrape/screenshot",
-            title: "Screenshot",
-          },
-          {
-            href: "/dashboard/scrape/qrcode",
-            title: "QR Code",
-          },
-          {
-            href: "/dashboard/scrape/meta-info",
-            title: "Meta Info",
-          },
-          {
-            href: "/dashboard/scrape/markdown",
-            title: "Markdown",
-          },
-        ],
-      },
     ],
   },
   {
@@ -97,7 +37,7 @@ export const sidebarLinks: SidebarNavItem[] = [
         authorizeOnly: UserRole.ADMIN,
       },
       {
-        href: "/admin/resources",
+        href: "",
         icon: "boxes",
         title: "Resources",
         authorizeOnly: UserRole.ADMIN,
@@ -124,35 +64,9 @@ export const sidebarLinks: SidebarNavItem[] = [
               },
             ],
           },
-          // {
-          //   href: "/admin/emails",
-          //   // icon: "globe",
-          //   title: "Emails",
-          //   authorizeOnly: UserRole.ADMIN,
-          //   items: [
-          //     {
-          //       href: "/admin/emails/sent",
-          //       title: "Sent",
-          //       authorizeOnly: UserRole.ADMIN,
-          //     },
-          //     {
-          //       href: "/admin/emails/trash",
-          //       title: "Trash",
-          //       authorizeOnly: UserRole.ADMIN,
-          //       disabled: true,
-          //     },
-          //   ],
-          // },
           {
             href: "/admin/records",
-            // icon: "globe",
             title: "Records",
-            authorizeOnly: UserRole.ADMIN,
-          },
-          {
-            href: "/admin/storage",
-            // icon: "storage",
-            title: "Cloud Storage Manage",
             authorizeOnly: UserRole.ADMIN,
           },
         ],
@@ -173,11 +87,6 @@ export const sidebarLinks: SidebarNavItem[] = [
             title: "Domains",
             authorizeOnly: UserRole.ADMIN,
           },
-          {
-            href: "/admin/system/plans",
-            title: "Plans",
-            authorizeOnly: UserRole.ADMIN,
-          },
         ],
       },
     ],
@@ -186,17 +95,6 @@ export const sidebarLinks: SidebarNavItem[] = [
     title: "OPTIONS",
     items: [
       { href: "/dashboard/settings", icon: "userSettings", title: "Settings" },
-      { href: "/docs", icon: "bookOpen", title: "Documentation" },
-      {
-        href: "/feedback",
-        icon: "messageQuoted",
-        title: "Feedback",
-      },
-      {
-        href: "mailto:" + siteConfig.mailSupport,
-        icon: "mail",
-        title: "Support",
-      },
     ],
   },
 ];

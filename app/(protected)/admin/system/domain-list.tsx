@@ -39,7 +39,7 @@ import { PaginationWrapper } from "@/components/shared/pagination";
 import { TimeAgoIntl } from "@/components/shared/time-ago";
 
 export interface DomainListProps {
-  user: Pick<User, "id" | "name" | "email" | "apiKey" | "role" | "team">;
+  user: Pick<User, "id" | "name" | "email" | "apiKey" | "role">;
   action: string;
 }
 
