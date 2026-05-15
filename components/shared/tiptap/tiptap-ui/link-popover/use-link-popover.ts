@@ -121,7 +121,7 @@ export function useLinkHandler(props: LinkHandlerProps) {
 
     let chain = editor.chain().focus();
 
-    chain = chain.extendMarkRange("link").setLink({ href: url });
+    chain = (chain.extendMarkRange("link") as any).setLink({ href: url });
 
     if (isEmpty) {
       chain = chain.insertContent({ type: "text", text: url });
