@@ -17,14 +17,14 @@ export async function GET() {
       "email_registration_suffix_limit_white_list",
     ]);
     return Response.json({
-      google: configs.enable_google_oauth,
-      github: configs.enable_github_oauth,
-      linuxdo: configs.enable_liunxdo_oauth,
-      resend: configs.enable_resend_email_login,
-      credentials: configs.enable_email_password_login,
-      registration: configs.enable_user_registration,
-      enableSuffixLimit: configs.enable_email_registration_suffix_limit,
-      suffixWhiteList: configs.email_registration_suffix_limit_white_list,
+      google: false,
+      github: false,
+      linuxdo: false,
+      resend: false,
+      credentials: true,
+      registration: configs.enable_user_registration ?? false,
+      enableSuffixLimit: false,
+      suffixWhiteList: "",
     });
   } catch (error) {
     console.log("[Error]", error);
