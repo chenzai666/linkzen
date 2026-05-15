@@ -1,256 +1,144 @@
 <div align="center">
-  <!-- <img src="https://likedo.vercel.app/_static/images/x-preview.png" alt="WR.DO" > -->
-  <h1>WR.DO</h1>
-  <p>一站式域名服务平台，集成短链服务、临时邮箱、子域名管理、文件存储和开放API接口。</p>
+  <h1>WR.DO Slim</h1>
+  <p>精简版域名服务平台，专注短链接管理与 DNS 子域名管理，自托管部署，SQLite 数据库。</p>
   <p>
-    <a href="https://like.do">官方站点</a> · <a href="https://likedo.vercel.app/docs/developer">部署文档</a> · <a href="https://likedo.vercel.app/feedback">反馈讨论</a> · <a href="/README-en.md">English</a> | 简体中文
+    基于 <a href="https://github.com/oiov/wr.do">oiov/wr.do</a> Fork · <a href="/README-en.md">English</a> | 简体中文
   </p>
-  <img alt="Vercel" src="https://img.shields.io/badge/vercel-online-55b467?labelColor=black&logo=vercel&style=flat-square">
-  <img alt="Release" src="https://img.shields.io/github/actions/workflow/status/oiov/wr.do/docker-build-push.yml?label=release&labelColor=black&logo=githubactions&logoColor=white&style=flat-square">
-  <img alt="Release" src="https://img.shields.io/github/release-date/oiov/wr.do?labelColor=black&style=flat-square">
-  <img alt="GitHub Release" src="https://img.shields.io/github/v/release/oiov/wr.do?style=flat-square&label=latest"><br>
-  <img src="https://img.shields.io/github/contributors/oiov/wr.do?color=c4f042&labelColor=black&style=flat-square" alt="contributors"/>
-  <img src="https://img.shields.io/github/stars/oiov/wr.do.svg?logo=github&style=flat-square" alt="star"/>
-  <img alt="GitHub forks" src="https://img.shields.io/github/forks/oiov/wr.do?style=flat-square">
-  <img alt="GitHub Issues or Pull Requests" src="https://img.shields.io/github/issues/oiov/wr.do?style=flat-square"> <br>
-  <img alt="GitHub Actions Workflow Status" src="https://img.shields.io/github/actions/workflow/status/oiov/wr.do/docker-build-push.yml?style=flat-square">
-	<img src="https://img.shields.io/github/license/oiov/wr.do?style=flat-square" alt="MIT"/><br><br>
-  <!-- <img width="15" src="https://storage.wr.do/2025/11/20/561763627504_.pic.jpg" /> 免费体验 Sora AI 视频生成 👉 <a href="https://sora.hk/i/5KY5N1FL">点击注册</a> -->
+  <img alt="Build" src="https://img.shields.io/github/actions/workflow/status/chenzai666/wr.do/docker-build-push.yml?label=build&labelColor=black&logo=githubactions&logoColor=white&style=flat-square">
+  <img src="https://img.shields.io/github/license/oiov/wr.do?style=flat-square" alt="MIT"/>
 </div>
 
-> 🌟 推荐 **Claude Code** 稳定 API 渠道：[nbility.dev](https://nbility.dev/register?aff=Dptp) ，支持 claude-opus-4-6 等主流 AI Coding 大模型🥳
+## 与原版的区别
 
-## 版本说明
+本仓库是 [oiov/wr.do](https://github.com/oiov/wr.do) 的精简 Fork，去除了臃肿的功能，专注核心用途：
 
-- 开源版 Demo：[likedo.vercel.app](https://likedo.vercel.app)
-- 运营版 LikeDo：[like.do](https://like.do) ，集成 [AI Agent](https://like.do/zh/docs/user-guide/ai-chat-assistant) 统一调度管理站内资源，内置[激励共创系统](https://like.do/zh/blog/introducing-co-creation-program)，点击使用[邀请码注册](https://like.do/auth/register?ref=DAR5HDV4) 。
+| 功能 | 原版 | 本版 |
+|------|------|------|
+| 短链接管理 | ✅ | ✅ |
+| DNS 子域名管理 | ✅ | ✅ |
+| 管理员面板 | ✅ | ✅ |
+| 数据库 | PostgreSQL | **SQLite**（无需额外容器）|
+| 登录方式 | OAuth + 密码 + 邮件验证 | **仅用户名+密码** |
+| 用户注册 | ✅ | ❌（管理员手动创建） |
+| 邮件服务 | ✅ | ❌ |
+| 云存储（S3/R2） | ✅ | ❌ |
+| 爬取/截图 API | ✅ | ❌ |
+| 聊天功能 | ✅ | ❌ |
+| 套餐/计划系统 | ✅ | ❌ |
 
-## 截图预览
+## 功能
 
-<table>
-  <tr>
-    <td><img src="https://likedo.vercel.app/_static/images/light-preview.png" /></td>
-    <td><img src="https://likedo.vercel.app/_static/images/example_02.png" /></td>
-  </tr>
-  <tr>
-    <td><img src="https://likedo.vercel.app/_static/images/example_01.png" /></td>
-    <td><img src="https://likedo.vercel.app/_static/images/realtime-globe.png" /></td>
-  </tr>
-  <tr>
-    <td><img src="https://likedo.vercel.app/_static/images/example_03.png" /></td>
-    <td><img src="https://likedo.vercel.app/_static/images/domains.png" /></td>
-  </tr>
-</table>
+### 🔗 短链接管理
+- 自定义短链、密码保护、过期时间
+- 访问统计（实时日志、地图、多维度数据分析）
+- 二维码生成
+- API 调用支持
 
+### 🌐 DNS 子域名管理
+- 管理 Cloudflare 账户下多域名的 DNS 记录
+- 支持 CNAME、A、TXT 等多种记录类型
+- 支持申请审批模式
 
-## 功能列表
-
-<details>
-<summary><strong> 🔗 短链服务</strong> - <a href="javascript:;">[功能列表]</a></summary>
-<ul>
-<li>支持自定义短链</li>
-<li>支持生成自定义二维码</li>
-<li>支持密码保护链接</li>
-<li>支持设置过期时间</li>
-<li>支持访问统计（实时日志、地图等多维度数据分析）</li>
-<li>支持调用 API 创建短链</li>
-</ul>
-</details>
-
-<details>
-<summary><strong> 📮 域名邮箱服务</strong> - <a href="javascript:;">[功能列表]</a></summary>
-<ul>
-<li>支持创建自定义前缀邮箱</li>
-<li>支持过滤未读邮件列表</li>
-<li>可创建无限数量邮箱</li>
-<li>支持接收无限制邮件 （依赖 Cloudflare Email Worker）</li>
-<li>支持发送邮件（依赖 Resend）</li>
-<li>支持 Catch-All 配置</li>
-<li>支持 Telegram 推送（多频道/群组）</li>
-<li>支持调用 API 创建邮箱</li>
-<li>支持调用 API 获取收件箱邮件</li>
-</ul>
-</details>
-
-<details>
-<summary><strong>🌐 子域名管理服务</strong> - <a href="javascript:;">[功能列表]</a></summary>
-<ul>
-<li>支持管理多 Cloudflare 账户下的多个域名的 DNS 记录</li>
-<li>支持创建多种 DNS 记录类型（CNAME、A、TXT 等）</li>
-<li>支持开启申请模式（用户提交、管理员审批）</li>
-<li>支持邮件通知管理员、用户域名申请状态</li>
-</ul>
-</details>
-
-<details>
-<summary><strong>📂 文件存储服务</strong> - <a href="javascript:;">[功能列表]</a></summary>
-<ul>
-<li>支持多渠道（S3 API）云存储平台（Cloudflare R2、AWS S3、OSS等）
-<li>支持单渠道多存储桶配置
-<li>动态配置文件上传大小限制
-<li>支持拖拽、批量、粘贴上传文件
-<li>支持批量删除文件
-<li>快捷生成文件短链、二维码
-<li>支持部分文件在线预览内容
-</ul>
-</details>
-
-<details>
-<summary><strong>📡 开放接口服务</strong> - <a href="javascript:;">[功能列表]</a></summary>
-<ul>
-<li>支持调用 API 获取网站元数据
-<li>支持调用 API 获取网站截图
-<li>支持调用 API 生成网站二维码
-<li>支持调用 API 将网站转换为 Markdown、Text
-<li>支持生成用户 API Key，用于第三方调用开放接口
-</ul>
-</details>
-
-<details>
-<summary><strong>👑 管理员模块</strong> - <a href="javascript:;">[功能列表]</a></summary>
-<ul>
-<li>多维度图表展示网站状态
-<li>域名服务配置（动态配置各项服务是否启用，包括短链、临时邮箱（收发邮件）
-<li>用户列表管理（设置权限、分配使用额度、禁用用户等）
-<li>动态配置登录方式 (支持 Google, GitHub, 邮箱验证, 账户密码, LinuxDO)
-<li>短链管理（管理所有用户创建的短链）
-<li>邮箱管理（管理所有用户创建的临时邮箱）
-<li>子域名管理（管理所有用户创建的子域名）
-</ul>
-</details>
+### 👑 管理员面板
+- 用户管理（创建、权限、封禁）
+- 域名配置
+- 系统配置
+- 短链 / DNS 记录总览
 
 ## 技术栈
 
-- Next.js + React + TypeScript
-- Tailwind CSS 用于样式设计
-- Prisma ORM 作为数据库工具
-- Cloudflare 作为主要的云基础设施
-- Vercel 作为推荐的部署平台
-- Resend 作为邮件服务
-- Next-Intl 作为国际化支持
+- **Next.js 14** + React + TypeScript
+- **Prisma ORM** + **SQLite**（无需额外数据库服务）
+- Tailwind CSS
+- NextAuth.js（Credentials 模式）
+- Cloudflare API（DNS 功能）
 
-## 快速开始
+## Docker 快速部署
 
-查看开发者[手把手部署教程](https://likedo.vercel.app/docs/developer/quick-start-zh)文档。
+### 1. 创建目录和配置文件
 
-## 自部署教程
-
-> 注意，任何部署方式都需要先配置环境变量，若部署后修改了环境变量，需要**重新部署**才会生效。
-
-### 使用 Vercel 部署
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/oiov/wr.do.git&project-name=wrdo)
-
-记得填写必要的环境变量。
-
-### 使用 Docker Compose 部署
-
-在服务器中创建一个文件夹，进入该文件夹并新建 [docker-compose.yml](https://github.com/oiov/wr.do/blob/main/docker-compose.yml)、[.env](https://github.com/oiov/wr.do/blob/main/.env.example) 文件：
-
-```yml
-- wrdo
-  | - docker-compose.yml
-  | - .env
+```bash
+mkdir wrdo && cd wrdo
 ```
 
-在 `.env` 中填写必要的环境变量，然后执行: 
+新建 `docker-compose.yml`：
+
+```yaml
+services:
+  app:
+    image: ghcr.io/chenzai666/wr.do/wrdo:slim
+    container_name: wrdo
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: file:/app/data/wrdo.db
+      AUTH_SECRET: "your-strong-secret-key"          # 必填，随机字符串
+      AUTH_URL: "http://your-domain:3000"             # 必填，改为实际访问地址
+      NEXT_PUBLIC_APP_URL: "http://your-domain:3000"  # 必填，改为实际访问地址
+      NEXT_PUBLIC_APP_NAME: "WR.DO"
+    volumes:
+      - wrdo_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  wrdo_data:
+    driver: local
+```
+
+### 2. 启动服务
 
 ```bash
 docker compose up -d
 ```
 
-> 或只创建 docker-compose.yml 文件，环境变量直接填写在yml中，比如将`DATABASE_URL: ${DATABASE_URL}`替换成`DATABASE_URL: your-database-uri`
+### 3. 创建管理员账号
 
-### 使用 EdgeOne 部署
+服务启动后访问 `http://your-domain:3000/setup` 完成管理员初始化。
 
-> 此方法部署目前无法build成功，不建议使用
+或进入容器手动操作数据库：
 
-[![使用 EdgeOne Pages 部署](https://cdnstatic.tencentcs.com/edgeone/pages/deploy.svg)](https://edgeone.ai/pages/new?repository-url=https%3A%2F%2Fgithub.com%2Foiov%2Fwr.do)
+```bash
+docker exec -it wrdo sh
+```
+
+---
 
 ## 本地开发
 
-将 `.env.example` 复制为 `.env` 并填写必要的环境变量。
-
 ```bash
-git clone https://github.com/oiov/wr.do
+git clone https://github.com/chenzai666/wr.do
 cd wr.do
+git checkout slim
 pnpm install
 ```
 
-#### 初始化数据库
+复制环境变量：
 
 ```bash
-pnpm postinstall
-pnpm db:push
+cp .env.example .env
+# 编辑 .env 填入必要变量
 ```
 
+初始化数据库并启动：
+
 ```bash
-# 在 localhost:3000 上运行
+pnpm db:push
 pnpm dev
 ```
 
-- 默认账号(管理员)：`admin@admin.com`
-- 默认密码：`123456`
+## 环境变量说明
 
-> 登录后请及时修改密码
+| 变量 | 必填 | 说明 |
+|------|------|------|
+| `DATABASE_URL` | ✅ | SQLite 路径，如 `file:./data/wrdo.db` |
+| `AUTH_SECRET` | ✅ | JWT 密钥，随机字符串即可 |
+| `AUTH_URL` | ✅ | 服务访问地址（含协议和端口） |
+| `NEXT_PUBLIC_APP_URL` | ✅ | 同上，用于前端 |
+| `NEXT_PUBLIC_APP_NAME` | ❌ | 站点名称，默认 `wr.do` |
 
-#### 管理员初始化
-
-> 此初始化引导在 v1.0.2 版本后, 不再是必要步骤
-
-访问 https://localhost:3000/setup
-
-## 环境变量
-
-查看 [开发者文档](https://likedo.vercel.app/docs/developer).
-
-## Fork 仓库同步
-
-本项目配置了与上游仓库 [oiov/wr.do](https://github.com/oiov/wr.do) 的同步工作流，支持：
-
-- 🔄 **手动触发同步** - 默认关闭自动同步，完全控制同步时机
-- 💬 **同步后自动评论** - 在相关 commit 上添加详细的同步信息
-- 🚨 **智能错误处理** - 同步失败时自动创建详细的 Issue
-- 🧹 **自动清理通知** - 自动关闭之前的同步失败 Issue
-
-前往[如何手动触发同步](https://likedo.vercel.app/docs/developer/sync)查看详细文档。
-
-## 社区群组
-
-- Discord: https://uv.do/disc
-- 微信群：
-
-<img width="300" src="https://wr.do/group" />
-
-## 贡献者
-
-<a href="https://github.com/oiov/wr.do/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=oiov/wr.do" />
-</a>
-
-## 请作者喝咖啡
-  
-[爱发电主页打赏](wr.do/afdhome)
-
-<img width="100" src="https://wr.do/bbpt9z?ref=https://github.com/oiov/wr.do" />
-
-
-## Star History
-
-<a href="https://star-history.com/#oiov/wr.do&Date">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=oiov/wr.do&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=oiov/wr.do&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=oiov/wr.do&type=Date" />
- </picture>
-</a>
+DNS 功能还需在管理员面板中配置 Cloudflare API Key。
 
 ## 开源协议
 
-[MIT](/LICENSE.md)
-
-
-
-
-
-
+[MIT](/LICENSE.md) · 基于 [oiov/wr.do](https://github.com/oiov/wr.do)
