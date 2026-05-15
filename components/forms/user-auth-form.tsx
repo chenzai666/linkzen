@@ -271,12 +271,6 @@ export function UserAuthForm({ className, type, ...props }: UserAuthFormProps) {
 
   return (
     <div className={cn("grid gap-3", className)} {...props}>
-      {!loginMethod.registration && (
-        <p className="rounded-md border border-dashed bg-muted p-3 text-sm text-muted-foreground">
-          📢 {t("Administrator has disabled new user registration")}.
-        </p>
-      )}
-
       {loginMethod["credentials"] && <>{rendeCredentials()}</>}
 
       {(loginMethod["google"] ||
