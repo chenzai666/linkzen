@@ -15,7 +15,7 @@ interface VersionNotifierProps {
 
 const VersionNotifier: React.FC<VersionNotifierProps> = ({
   currentVersion = pkg.version,
-  githubRepo = "oiov/wr.do",
+  githubRepo = "",
   className = "",
 }) => {
   const [latestVersion, setLatestVersion] = useState<string>("");
@@ -38,7 +38,7 @@ const VersionNotifier: React.FC<VersionNotifierProps> = ({
   };
 
   const checkVersion = async () => {
-    if (isLoading) return;
+    if (isLoading || !githubRepo) return;
 
     setIsLoading(true);
     try {

@@ -26,10 +26,10 @@ export default async function DashboardPage() {
   -H "Content-Type: application/json" \\
   -H "wrdo-api-key: YOUR_API_KEY" \\
   -d '{
-    "target": "https://www.oiov.dev",
+    "target": "https://example.com",
     "url": "abc123",
     "expiration": "-1",
-    "prefix": "wr.do",
+    "prefix": "your-domain",
     "visible": 1,
     "active": 1,
     "password": ""

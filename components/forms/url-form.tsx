@@ -316,7 +316,7 @@ export function UrlForm({
               ) : (
                 <p className="pb-0.5 text-[13px] text-muted-foreground">
                   {t("A random url suffix")}. {t("Final url like")}
-                  「wr.do/suffix」
+                  「domain/suffix」
                 </p>
               )}
             </div>

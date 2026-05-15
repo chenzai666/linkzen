@@ -34,16 +34,14 @@ export function constructMetadata({
       "DNS Records",
       "Subdomains",
       "Short Link",
-      "Email",
       "Open API",
-      "Screenshot API",
     ],
     authors: [
       {
-        name: "oiov",
+        name: "LinkZen",
       },
     ],
-    creator: "oiov",
+    creator: "LinkZen",
     openGraph: {
       type: "website",
       locale: "en_US",
@@ -57,7 +55,7 @@ export function constructMetadata({
       title,
       description,
       images: [image],
-      creator: "@yesmoree",
+      creator: "@linkzen",
     },
     icons,
     metadataBase: new URL(siteConfig.url),

@@ -29,8 +29,6 @@ export async function GET(req: Request) {
 
     const fontSize = heading.length > 80 ? "60px" : "80px";
 
-    const githubName = "oiov";
-
     return new ImageResponse(
       (
         <div
@@ -54,7 +52,7 @@ export async function GET(req: Request) {
               color: "transparent",
             }}
           >
-            WR.DO
+            LinkZen
           </div>
 
           <div tw="flex flex-col flex-1 py-16">
@@ -122,7 +120,7 @@ export async function GET(req: Request) {
                 />
               </svg>
               <div tw="flex ml-2">
-                github.com/mickasmt/next-auth-roles-template
+                LinkZen
               </div>
             </div>
           </div>

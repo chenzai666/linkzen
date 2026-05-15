@@ -222,7 +222,7 @@ export default function QRCodeEditor({
             ref={anchorRef}
           />
 
-          <CopyButton value={`https://wr.do${qrCodeUrl}`}></CopyButton>
+          <CopyButton value={`${window.location.origin}${qrCodeUrl}`}></CopyButton>
         </div>
         <div className="relative mt-2 flex h-40 items-center justify-center overflow-hidden rounded-md border border-gray-300">
           <div className="absolute inset-0 h-full w-full bg-neutral-50/60 bg-[radial-gradient(#d7d9dd_1px,transparent_1px)] [background-size:8px_9px]"></div>

@@ -6,8 +6,6 @@ import { footerLinks, siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { ModeToggle } from "@/components/layout/mode-toggle";
 
-// import { NewsletterForm } from "../forms/newsletter-form";
-import GitHubStarsWithSuspense from "../shared/github-star-wrapper";
 import { Icons } from "../shared/icons";
 
 export function SiteFooter({ className }: React.HTMLAttributes<HTMLElement>) {
@@ -27,11 +25,8 @@ export function SiteFooter({ className }: React.HTMLAttributes<HTMLElement>) {
             </Link>
           </div>
           <div className="mt-4 text-sm">
-            All-in-one domain platform with short links, temp email,
-            <br />
-            subdomain management, file storage, and open APIs.
+            Short links & DNS management platform.
           </div>
-          <GitHubStarsWithSuspense className="mt-4" owner="oiov" repo="wr.do" />
         </div>
         {footerLinks.map((section) => (
           <div key={section.title}>
@@ -69,25 +64,10 @@ export function SiteFooter({ className }: React.HTMLAttributes<HTMLElement>) {
             >
               {siteConfig.name}
             </Link>
-            <Link
-              href={`${siteConfig.links.github}/releases/latest`}
-              target="_blank"
-              rel="noreferrer"
-              className="font-thin underline-offset-2 hover:underline"
-            >
-              v{pkg.version}
-            </Link>
+            <span className="font-thin">v{pkg.version}</span>
           </div>
 
           <div className="flex items-center gap-3">
-            <Link
-              href={siteConfig.url}
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium underline underline-offset-1"
-            >
-              <Icons.github className="size-5" />
-            </Link>
             <ModeToggle />
           </div>
         </div>
