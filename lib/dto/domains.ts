@@ -2,28 +2,21 @@ import { prisma } from "../db";
 
 export const FeatureMap = {
   short: "enable_short_link",
-  email: "enable_email",
   record: "enable_dns",
 };
 
 export interface DomainConfig {
   domain_name: string;
   enable_short_link: boolean;
-  enable_email: boolean;
   enable_dns: boolean;
   cf_zone_id: string | null;
   cf_api_key: string | null;
   cf_email: string | null;
   cf_record_types: string;
   cf_api_key_encrypted: boolean;
-  email_provider: string;
-  resend_api_key: string | null;
-  brevo_api_key: string | null;
   min_url_length: number;
-  min_email_length: number;
   min_record_length: number;
   max_short_links: number | null;
-  max_email_forwards: number | null;
   max_dns_records: number | null;
   active: boolean;
 }
@@ -77,10 +70,8 @@ export async function getDomainsByFeature(
         domain_name: true,
         cf_record_types: true,
         min_url_length: true,
-        min_email_length: true,
         min_record_length: true,
         enable_short_link: admin,
-        enable_email: admin,
         enable_dns: admin,
         cf_zone_id: admin,
         cf_api_key: admin,
@@ -101,7 +92,6 @@ export async function getDomainsByFeatureClient(feature: string) {
         domain_name: true,
         cf_record_types: true,
         min_url_length: true,
-        min_email_length: true,
         min_record_length: true,
       },
       orderBy: {
@@ -118,46 +108,6 @@ export async function getDomainByName(domain_name: string) {
   return await prisma.domain.findUnique({
     where: { domain_name },
   });
-}
-
-export async function checkDomainIsConfiguratedEmailProvider(
-  domain_name: string,
-) {
-  try {
-    const domain = await prisma.domain.findUnique({
-      where: { domain_name },
-      select: {
-        email_provider: true,
-        resend_api_key: true,
-        brevo_api_key: true,
-      },
-    });
-    if (domain?.email_provider === "Resend")
-      return { email_key: domain?.resend_api_key, provider: "Resend" };
-    if (domain?.email_provider === "Brevo")
-      return { email_key: domain?.brevo_api_key, provider: "Brevo" };
-    return { email_key: null, provider: null };
-  } catch (error) {
-    throw new Error(`Failed to fetch domain config: ${error.message}`);
-  }
-}
-
-export async function getConfiguredEmailDomains() {
-  try {
-    const domains = await prisma.domain.findMany({
-      where: { email_provider: "Brevo" },
-      select: {
-        domain_name: true,
-        brevo_api_key: true,
-      },
-      orderBy: {
-        updatedAt: "desc",
-      },
-    });
-    return domains;
-  } catch (error) {
-    return [];
-  }
 }
 
 export async function createDomain(data: DomainConfig) {

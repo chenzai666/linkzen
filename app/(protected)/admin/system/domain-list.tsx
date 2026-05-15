@@ -115,7 +115,6 @@ export default function DomainList({ user, action }: DomainListProps) {
         id: domain.id,
         enable_short_link:
           target === "enable_short_link" ? checked : domain.enable_short_link,
-        enable_email: target === "enable_email" ? checked : domain.enable_email,
         enable_dns: target === "enable_dns" ? checked : domain.enable_dns,
         active: target === "active" ? checked : domain.active,
       }),
@@ -229,9 +228,6 @@ export default function DomainList({ user, action }: DomainListProps) {
                   {t("Shorten Service")}
                 </TableHead>
                 <TableHead className="col-span-1 hidden items-center text-nowrap font-bold sm:flex">
-                  {t("Email Service")}
-                </TableHead>
-                <TableHead className="col-span-1 hidden items-center text-nowrap font-bold sm:flex">
                   {t("Subdomain Service")}
                 </TableHead>
                 <TableHead className="col-span-1 flex items-center text-nowrap font-bold">
@@ -280,22 +276,6 @@ export default function DomainList({ user, action }: DomainListProps) {
                             )
                           }
                         />
-                      </TableCell>
-                      <TableCell className="col-span-1 hidden items-center gap-1 sm:flex">
-                        <Switch
-                          defaultChecked={domain.enable_email}
-                          onCheckedChange={(value) =>
-                            handleChangeStatus(value, "enable_email", domain)
-                          }
-                        />
-                        {domain.email_provider === "Resend" &&
-                          domain.resend_api_key && (
-                            <Icons.resend className="mx-0.5 size-4" />
-                          )}
-                        {domain.email_provider === "Brevo" &&
-                          domain.brevo_api_key && (
-                            <Icons.brevo className="mx-0.5 size-4" />
-                          )}
                       </TableCell>
                       <TableCell className="col-span-1 hidden items-center gap-1 sm:flex">
                         <Switch
