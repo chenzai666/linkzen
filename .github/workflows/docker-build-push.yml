@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - dev
+      - slim
     tags:
       - "v*.*.*"
   pull_request:
