@@ -130,9 +130,9 @@ export function UserForm({
       </div>
       <form className="max-w-2xl p-4" onSubmit={onSubmit}>
         <div className="items-center justify-start gap-4 md:flex">
-          <FormSectionColumns title={t("Email")} required>
+          <FormSectionColumns title={t("Username")} required>
             <div className="flex w-full items-center gap-2">
-              <Label className="sr-only" htmlFor="email">{t("Email")}</Label>
+              <Label className="sr-only" htmlFor="email">{t("Username")}</Label>
               <Input
                 id="email"
                 className="flex-1 shadow-inner"

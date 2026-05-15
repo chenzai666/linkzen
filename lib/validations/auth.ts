@@ -6,7 +6,7 @@ export const userAuthSchema = z.object({
 
 export const userPasswordAuthSchema = z.object({
   name: z.string().optional(),
-  email: z.string().email(),
+  email: z.string().min(1, "请输入用户名"),
   password: z.string().min(6),
 });
 

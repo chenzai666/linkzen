@@ -217,10 +217,10 @@ export function UserAuthForm({ className, type, ...props }: UserAuthFormProps) {
             </Label>
             <Input
               id="email"
-              placeholder="email@example.com"
-              type="email"
+              placeholder="用户名"
+              type="text"
               autoCapitalize="none"
-              autoComplete="email"
+              autoComplete="username"
               autoCorrect="off"
               disabled={isLoading || isGoogleLoading}
               {...register2("email")}

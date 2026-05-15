@@ -5,12 +5,28 @@ import { hashPassword, verifyPassword } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
-    if (!email || !password) {
-      return Response.json("email and password is required", { status: 400 });
+    const { email: username, password } = await req.json();
+    if (!username || !password) {
+      return Response.json("username and password is required", { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const userCount = await prisma.user.count();
+
+    // 数据库没有用户时，第一个账号自动成为管理员
+    if (userCount === 0) {
+      const newUser = await prisma.user.create({
+        data: {
+          email: username,
+          name: username,
+          password: hashPassword(password),
+          role: "ADMIN",
+          active: 1,
+        },
+      });
+      return Response.json(newUser, { status: 200 });
+    }
+
+    const user = await prisma.user.findUnique({ where: { email: username } });
 
     if (!user) {
       return Response.json("User not found", { status: 404 });
