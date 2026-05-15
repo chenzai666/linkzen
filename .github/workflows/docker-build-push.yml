@@ -24,8 +24,8 @@ jobs:
       - name: 登录 Docker Hub
         uses: docker/login-action@v3
         with:
-          username: bats666
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: 提取镜像元数据
         id: meta
