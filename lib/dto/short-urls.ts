@@ -1,4 +1,4 @@
-import { UrlMeta, UserRole } from "@prisma/client";
+import { UrlMeta } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 
@@ -34,7 +34,7 @@ export async function getUserShortUrls(
   active: number = 1,
   page: number,
   size: number,
-  role: UserRole = "USER",
+  role: string = "USER",
   userName: string = "",
   url: string = "",
   target: string = "",
@@ -92,7 +92,7 @@ export async function getUserShortUrls(
 export async function getUserShortUrlCount(
   userId: string,
   active: number = 1,
-  role: UserRole = "USER",
+  role: string = "USER",
 ) {
   try {
     // Start of last month from now
@@ -152,7 +152,7 @@ export async function getUserShortLinksByIds(ids: string[], userId?: string) {
 export async function getUrlClicksByIds(
   ids: string[],
   userId: string,
-  role: UserRole,
+  role: string,
 ): Promise<Record<string, number>> {
   if (ids.length === 0) return {};
 
@@ -179,7 +179,7 @@ export async function getUrlClicksByIds(
   }
 }
 
-export async function getUrlStatus(userId: string, role: UserRole = "USER") {
+export async function getUrlStatus(userId: string, role: string = "USER") {
   try {
   } catch (error) {
     return { status: error };
@@ -200,7 +200,7 @@ function isValidExpirationValue(expiration: string): boolean {
 
 export async function getUrlStatusOptimized(
   userId: string,
-  role: UserRole = "USER",
+  role: string = "USER",
 ): Promise<UrlStatusStats | { status: any }> {
   try {
     const whereCondition = role === "USER" ? { userId } : {};
@@ -345,7 +345,7 @@ export async function updateUserShortUrlActive(
   userId: string,
   id: string,
   active: number = 1,
-  role: UserRole = "USER",
+  role: string = "USER",
 ) {
   try {
     const option = role === "USER" ? { userId, id } : { id };

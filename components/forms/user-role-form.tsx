@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { updateUserRole, type FormData } from "@/actions/update-user-role";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { User, UserRole } from "@prisma/client";
+import { User } from "@prisma/client";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
@@ -40,7 +40,7 @@ export function UserRoleForm({ user }: UserNameFormProps) {
   const [isPending, startTransition] = useTransition();
   const updateUserRoleWithId = updateUserRole.bind(null, user.id);
 
-  const roles = Object.values(UserRole);
+  const roles = ["USER", "ADMIN"];
   const [role, setRole] = useState(user.role);
 
   const t = useTranslations("Setting");
@@ -84,7 +84,7 @@ export function UserRoleForm({ user }: UserNameFormProps) {
                   <FormLabel className="sr-only">{t("Role")}</FormLabel>
                   <Select
                     // TODO:(FIX) Option value not update. Use useState for the moment
-                    onValueChange={(value: UserRole) => {
+                    onValueChange={(value: string) => {
                       setUpdated(user.role !== value);
                       setRole(value);
                       // field.onChange;

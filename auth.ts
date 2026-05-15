@@ -1,5 +1,5 @@
 import authConfig from "@/auth.config";
-import { UserRole } from "@prisma/client";
+
 import NextAuth, { type DefaultSession } from "next-auth";
 
 import { getUserById } from "@/lib/dto/user";
@@ -7,7 +7,7 @@ import { getUserById } from "@/lib/dto/user";
 declare module "next-auth" {
   interface Session {
     user: {
-      role: UserRole;
+      role: string;
       active: number;
       apiKey: string;
     } & DefaultSession["user"];
@@ -28,7 +28,7 @@ export const {
       if (session.user) {
         if (token.sub) session.user.id = token.sub;
         if (token.email) session.user.email = token.email;
-        if (token.role) session.user.role = token.role as UserRole;
+        if (token.role) session.user.role = token.role as string;
         session.user.name = token.name;
         session.user.active = token.active as number;
         session.user.apiKey = token.apiKey as string;

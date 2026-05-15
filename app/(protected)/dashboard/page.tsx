@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
-import { UserRole } from "@prisma/client";
+
 
 import { getUserRecordCount } from "@/lib/dto/cloudflare-dns-record";
 import { getUserShortUrlCount } from "@/lib/dto/short-urls";
@@ -75,7 +75,7 @@ export default async function DashboardPage() {
                 name: user.name || "",
                 apiKey: user.apiKey || "",
                 email: user.email || "",
-                role: user.role as UserRole,
+                role: user.role as string,
               }}
               action="/api/record"
             />
@@ -88,7 +88,7 @@ export default async function DashboardPage() {
                 id: user.id,
                 name: user.name || "",
                 apiKey: user.apiKey || "",
-                role: user.role as UserRole,
+                role: user.role as string,
               }}
               action="/api/url"
             />

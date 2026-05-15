@@ -2,13 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
-import { UserRole } from "@prisma/client";
+
 
 import { prisma } from "@/lib/db";
 import { userRoleSchema } from "@/lib/validations/user";
 
 export type FormData = {
-  role: UserRole;
+  role: string;
 };
 
 export async function updateUserRole(userId: string, data: FormData) {

@@ -1,6 +1,6 @@
 "use server";
 
-import { User, UserRole } from "@prisma/client";
+import { User } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 import {
@@ -135,7 +135,7 @@ export async function getUserRecords(
   active: number = 1,
   page: number,
   size: number,
-  role: UserRole = "USER",
+  role: string = "USER",
 ) {
   const option =
     role === "USER"
@@ -196,7 +196,7 @@ export async function getUserRecords(
 export async function getUserRecordCount(
   userId: string,
   active: number = 1,
-  role: UserRole = "USER",
+  role: string = "USER",
 ) {
   try {
     const now = new Date();
@@ -231,7 +231,7 @@ export async function getUserRecordCount(
 
 export async function getUserRecordStatus(
   userId: string,
-  role: UserRole = "USER",
+  role: string = "USER",
 ) {
   const whereCondition = role === "USER" ? { userId } : {};
 

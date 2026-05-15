@@ -1,4 +1,3 @@
-import { UserRole } from "@prisma/client";
 import * as z from "zod";
 
 export const userAuthSchema = z.object({
@@ -13,9 +12,9 @@ export const userPasswordAuthSchema = z.object({
 
 export const updateUserSchema = z.object({
   email: z.string().email(),
-  image: z.string(),
+  image: z.string().optional(),
   name: z.string(),
   active: z.number().default(1),
-  role: z.nativeEnum(UserRole),
+  role: z.string(),
   password: z.string().optional(),
 });

@@ -7,11 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {
-  ADMIN
-  USER
-}
-
 model User {
   id        String   @id @default(cuid())
   name      String?
@@ -20,7 +15,7 @@ model User {
   apiKey    String?
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @default(now()) @map(name: "updated_at")
-  role      UserRole @default(USER)
+  role      String   @default("USER")
   password  String?
 
   UserRecord UserRecord[]

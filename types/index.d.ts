@@ -1,4 +1,4 @@
-import { User, UserRole } from "@prisma/client";
+import { User } from "@prisma/client";
 import type { Icon } from "lucide-react";
 
 import { Icons } from "@/components/shared/icons";
@@ -25,7 +25,7 @@ export type NavItem = {
   badge?: number;
   disabled?: boolean;
   external?: boolean;
-  authorizeOnly?: UserRole;
+  authorizeOnly?: string;
   icon?: keyof typeof Icons;
   items?: NavItem[];
 };
@@ -39,7 +39,7 @@ export type MarketingConfig = {
 export type SidebarNavItem = {
   title: string;
   items: NavItem[];
-  authorizeOnly?: UserRole;
+  authorizeOnly?: string;
   icon?: keyof typeof Icons;
 };
 

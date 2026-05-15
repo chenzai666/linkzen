@@ -1,4 +1,4 @@
-import { User, UserRole } from "@prisma/client";
+import { User } from "@prisma/client";
 
 import { prisma } from "@/lib/db";
 
@@ -89,7 +89,7 @@ export async function setFirstUserAsAdmin(userId: string) {
   try {
     return await prisma.user.update({
       where: { id: userId },
-      data: { role: UserRole.ADMIN },
+      data: { role: "ADMIN" },
     });
   } catch (error) {
     return null;
@@ -226,7 +226,7 @@ export function checkUserStatus(user: any) {
 
 export function getFirstAdminUser() {
   return prisma.user.findFirst({
-    where: { role: UserRole.ADMIN, email: { not: "admin@admin.com" } },
+    where: { role: "ADMIN", email: { not: "admin@admin.com" } },
     select: { email: true },
   });
 }

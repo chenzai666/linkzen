@@ -1,4 +1,4 @@
-import { UserRole } from "@prisma/client";
+
 
 import { SidebarNavItem } from "types";
 
@@ -28,46 +28,46 @@ export const sidebarLinks: SidebarNavItem[] = [
         href: "/admin",
         icon: "laptop",
         title: "Admin Panel",
-        authorizeOnly: UserRole.ADMIN,
+        authorizeOnly: "ADMIN",
       },
       {
         href: "/admin/users",
         icon: "users",
         title: "Users",
-        authorizeOnly: UserRole.ADMIN,
+        authorizeOnly: "ADMIN",
       },
       {
         href: "",
         icon: "boxes",
         title: "Resources",
-        authorizeOnly: UserRole.ADMIN,
+        authorizeOnly: "ADMIN",
         items: [
           {
             href: "",
             title: "URLs",
-            authorizeOnly: UserRole.ADMIN,
+            authorizeOnly: "ADMIN",
             items: [
               {
                 href: "/admin/urls",
                 title: "List",
-                authorizeOnly: UserRole.ADMIN,
+                authorizeOnly: "ADMIN",
               },
               {
                 href: "/admin/urls/analytics",
                 title: "Analytics",
-                authorizeOnly: UserRole.ADMIN,
+                authorizeOnly: "ADMIN",
               },
               {
                 href: "/admin/urls/logs",
                 title: "Ip Logs",
-                authorizeOnly: UserRole.ADMIN,
+                authorizeOnly: "ADMIN",
               },
             ],
           },
           {
             href: "/admin/records",
             title: "Records",
-            authorizeOnly: UserRole.ADMIN,
+            authorizeOnly: "ADMIN",
           },
         ],
       },
@@ -75,17 +75,17 @@ export const sidebarLinks: SidebarNavItem[] = [
         href: "",
         icon: "settings",
         title: "System Settings",
-        authorizeOnly: UserRole.ADMIN,
+        authorizeOnly: "ADMIN",
         items: [
           {
             href: "/admin/system",
             title: "App Configs",
-            authorizeOnly: UserRole.ADMIN,
+            authorizeOnly: "ADMIN",
           },
           {
             href: "/admin/system/domains",
             title: "Domains",
-            authorizeOnly: UserRole.ADMIN,
+            authorizeOnly: "ADMIN",
           },
         ],
       },

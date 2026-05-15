@@ -2,7 +2,7 @@
 
 import { Dispatch, SetStateAction, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { User, UserRole } from "@prisma/client";
+import { User } from "@prisma/client";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -161,7 +161,7 @@ export function UserForm({
         <div className="items-center justify-start gap-4 md:flex">
           <FormSectionColumns title={t("Role")}>
             <Select
-              onValueChange={(value: string) => setValue("role", value as UserRole)}
+              onValueChange={(value: string) => setValue("role", value)}
               name="role"
               defaultValue={`${initData?.role}` || "USER"}
             >
