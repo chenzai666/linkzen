@@ -43,7 +43,7 @@ export function UserApiKeyForm({ user }: UserNameFormProps) {
         method: "POST",
       });
       if (!response.ok || response.status !== 200) {
-        toast.error("Created Failed!", {
+        toast.error("创建失败", {
           description: response.statusText,
         });
       } else {

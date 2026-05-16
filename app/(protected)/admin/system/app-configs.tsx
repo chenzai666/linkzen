@@ -47,10 +47,10 @@ export default function AppConfigs({}: {}) {
         body: JSON.stringify({ key, value, type }),
       });
       if (res.ok) {
-        toast.success("Saved");
+        toast.success("已保存");
         mutate();
       } else {
-        toast.error("Failed to save", {
+        toast.error("保存失败", {
           description: await res.text(),
         });
       }

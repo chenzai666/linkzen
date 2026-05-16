@@ -238,7 +238,7 @@ export function UserAuthForm({ className, type, ...props }: UserAuthFormProps) {
             <Input
               id="password"
               type="password"
-              placeholder="Enter password"
+              placeholder="请输入密码"
               autoCapitalize="none"
               autoComplete="password"
               autoCorrect="off"

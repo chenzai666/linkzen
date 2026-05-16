@@ -51,13 +51,13 @@ export function UserPasswordForm({ user }: UserPasswordFormProps) {
       const { status } = await updateUserPasswordWithId(data);
 
       if (status !== "success") {
-        toast.error("Something went wrong.", {
+        toast.error("操作失败", {
           description: "Your password was not updated. Please try again.",
         });
       } else {
         await update();
         setUpdated(false);
-        toast.success("Your password has been updated.");
+        toast.success("密码已更新");
       }
     });
   });

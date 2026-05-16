@@ -185,10 +185,10 @@ export default function UserUrlsList({ user, action }: UrlListProps) {
     if (res.ok) {
       const data = await res.json();
       if (data) {
-        toast.success("Successed!");
+        toast.success("操作成功");
       }
     } else {
-      toast.error("Activation failed!");
+      toast.error("状态更新失败");
     }
   };
 

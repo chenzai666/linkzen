@@ -122,11 +122,11 @@ export default function DomainList({ user, action }: DomainListProps) {
     if (res.ok) {
       const data = await res.json();
       if (data) {
-        toast.success("Saved");
+        toast.success("已保存");
         handleRefresh();
       }
     } else {
-      toast.error("Activation failed!");
+      toast.error("状态更新失败");
     }
   };
 
@@ -139,7 +139,7 @@ export default function DomainList({ user, action }: DomainListProps) {
         }),
       });
       if (!response.ok || response.status !== 200) {
-        toast.error("Duplicate Failed!", {
+        toast.error("复制失败", {
           description: await response.text(),
         });
       } else {

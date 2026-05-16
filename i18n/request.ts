@@ -3,7 +3,7 @@ import { getRequestConfig } from "next-intl/server";
 
 export default getRequestConfig(async () => {
   const locales = ["en", "zh"];
-  const defaultLocale = "en";
+  const defaultLocale = "zh";
 
   const headersList = headers();
   // 获取 cookie 中的语言设置

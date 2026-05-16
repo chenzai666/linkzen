@@ -155,7 +155,7 @@ export function RecordForm({
 
   const handleCreateRecord = async (data: CreateDNSRecord) => {
     if (configs?.enable_subdomain_apply && data.comment!.length < 20) {
-      toast.warning("Apply reason must be at least 20 characters!");
+      toast.warning("申请理由至少需要 20 个字符");
     } else {
       startTransition(async () => {
         const response = await fetch(`${action}/add`, {
@@ -166,11 +166,11 @@ export function RecordForm({
           }),
         });
         if (!response.ok || response.status !== 200) {
-          toast.error("Created Failed!", {
+          toast.error("创建失败", {
             description: await response.text(),
           });
         } else {
-          toast.success(`Created successfully!`);
+          toast.success("创建成功");
           setShowForm(false);
           onRefresh();
         }
@@ -190,11 +190,11 @@ export function RecordForm({
           }),
         });
         if (!response.ok || response.status !== 200) {
-          toast.error("Update Failed", {
+          toast.error("更新失败", {
             description: await response.text(),
           });
         } else {
-          toast.success(`Update successfully!`);
+          toast.success("更新成功");
           setShowForm(false);
           onRefresh();
         }
@@ -215,11 +215,11 @@ export function RecordForm({
           }),
         });
         if (!response.ok || response.status !== 200) {
-          toast.error("Update Failed", {
+          toast.error("更新失败", {
             description: await response.text(),
           });
         } else {
-          toast.success(`Update successfully!`);
+          toast.success("更新成功");
           setShowForm(false);
           onRefresh();
         }
@@ -240,12 +240,12 @@ export function RecordForm({
           }),
         });
         if (!response.ok || response.status !== 200) {
-          toast.error("Delete Failed", {
+          toast.error("删除失败", {
             description: await response.text(),
           });
         } else {
           await response.json();
-          toast.success(`Success`);
+          toast.success("操作成功");
           setShowForm(false);
           onRefresh();
         }
@@ -265,12 +265,12 @@ export function RecordForm({
         }),
       });
       if (!response.ok || response.status !== 200) {
-        toast.error("Failed", {
+        toast.error("操作失败", {
           description: await response.text(),
         });
       } else {
         await response.json();
-        toast.success(`Success`);
+        toast.success("操作成功");
         setShowForm(false);
         onRefresh();
       }

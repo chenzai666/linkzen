@@ -78,9 +78,9 @@ export function UserForm({
         body: JSON.stringify(data),
       });
       if (!response.ok || response.status !== 200) {
-        toast.error("Create Failed", { description: response.statusText });
+        toast.error("创建失败", { description: response.statusText });
       } else {
-        toast.success(`Create successfully!`);
+        toast.success("创建成功");
         setShowForm(false);
         onRefresh();
       }
@@ -95,9 +95,9 @@ export function UserForm({
           body: JSON.stringify({ id: initData?.id, data }),
         });
         if (!response.ok || response.status !== 200) {
-          toast.error("Update Failed", { description: response.statusText });
+          toast.error("更新失败", { description: response.statusText });
         } else {
-          toast.success(`Update successfully!`);
+          toast.success("更新成功");
           setShowForm(false);
           onRefresh();
         }
@@ -113,9 +113,9 @@ export function UserForm({
           body: JSON.stringify({ id: initData?.id }),
         });
         if (!response.ok || response.status !== 200) {
-          toast.error("Delete Failed", { description: response.statusText });
+          toast.error("删除失败", { description: response.statusText });
         } else {
-          toast.success(`Success`);
+          toast.success("操作成功");
           setShowForm(false);
           onRefresh();
         }

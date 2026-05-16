@@ -96,11 +96,11 @@ export function DomainForm({
         body: JSON.stringify({ data }),
       });
       if (!response.ok || response.status !== 200) {
-        toast.error("Created Failed!", {
+        toast.error("创建失败", {
           description: await response.text(),
         });
       } else {
-        toast.success(`Created successfully!`);
+        toast.success("创建成功");
         setShowForm(false);
         onRefresh();
       }
@@ -115,12 +115,12 @@ export function DomainForm({
           body: JSON.stringify(data),
         });
         if (!response.ok || response.status !== 200) {
-          toast.error("Update Failed", {
+          toast.error("更新失败", {
             description: await response.text(),
           });
         } else {
           await response.json();
-          toast.success(`Update successfully!`);
+          toast.success("更新成功");
           setShowForm(false);
           onRefresh();
         }
@@ -136,12 +136,12 @@ export function DomainForm({
           body: JSON.stringify({ domain_name: initData?.domain_name }),
         });
         if (!response.ok || response.status !== 200) {
-          toast.error("Delete Failed", {
+          toast.error("删除失败", {
             description: await response.text(),
           });
         } else {
           await response.json();
-          toast.success(`Success`);
+          toast.success("操作成功");
           setShowForm(false);
           onRefresh();
         }
@@ -170,8 +170,8 @@ export function DomainForm({
         }
       }
       setIsCheckedCfConfig(false);
-      toast.error("Access Failed", {
-        description: "Please check your Cloudflare settings and try again.",
+      toast.error("访问失败", {
+        description: "请检查 Cloudflare 配置后重试",
       });
     });
   };

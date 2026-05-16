@@ -138,7 +138,7 @@ export default function UserRecordsList({ user, action }: RecordListProps) {
       }
     } else {
       setChecked(originalState);
-      toast.error("Failed to update status");
+      toast.error("状态更新失败");
     }
   };
 

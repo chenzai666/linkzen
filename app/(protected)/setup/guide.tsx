@@ -264,7 +264,7 @@ function AddDomain({ onNextStep }: { onNextStep: () => void }) {
   const t = useTranslations("Common");
   const handleCreateDomain = async () => {
     if (!domain) {
-      toast.warning("Domain name cannot be empty");
+      toast.warning("域名不能为空");
       return;
     }
     startTransition(async () => {
@@ -288,7 +288,7 @@ function AddDomain({ onNextStep }: { onNextStep: () => void }) {
       if (res.ok) {
         onNextStep();
       } else {
-        toast.error("Created Failed!", {
+        toast.error("创建失败", {
           description: await res.text(),
         });
       }

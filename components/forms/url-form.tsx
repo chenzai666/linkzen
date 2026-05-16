@@ -127,7 +127,7 @@ export function UrlForm({
 
   const handleCreateUrl = async (data: ShortUrlFormData) => {
     if (data.password !== "" && data.password.length !== 6) {
-      toast.error("Password must be 6 characters!");
+      toast.error("访问密码需要 6 位字符");
       return;
     }
     startTransition(async () => {
@@ -138,12 +138,12 @@ export function UrlForm({
         }),
       });
       if (!response.ok || response.status !== 200) {
-        toast.error("Created Failed!", {
+        toast.error("创建失败", {
           description: await response.text(),
         });
       } else {
         const res = await response.json();
-        toast.success(`Created successfully!`);
+        toast.success("创建成功");
         setShowForm(false);
         onRefresh(res.id);
       }
@@ -152,7 +152,7 @@ export function UrlForm({
 
   const handleUpdateUrl = async (data: ShortUrlFormData) => {
     if (data.password !== "" && data.password.length !== 6) {
-      toast.error("Password must be 6 characters!");
+      toast.error("访问密码需要 6 位字符");
       return;
     }
     startTransition(async () => {
@@ -162,12 +162,12 @@ export function UrlForm({
           body: JSON.stringify({ data, userId: initData?.userId, email }),
         });
         if (!response.ok || response.status !== 200) {
-          toast.error("Update Failed", {
+          toast.error("更新失败", {
             description: await response.text(),
           });
         } else {
           const res = await response.json();
-          toast.success(`Update successfully!`);
+          toast.success("更新成功");
           setShowForm(false);
           onRefresh();
         }
@@ -186,12 +186,12 @@ export function UrlForm({
           }),
         });
         if (!response.ok || response.status !== 200) {
-          toast.error("Delete Failed", {
+          toast.error("删除失败", {
             description: await response.text(),
           });
         } else {
           await response.json();
-          toast.success(`Success`);
+          toast.success("操作成功");
           setShowForm(false);
           onRefresh();
         }

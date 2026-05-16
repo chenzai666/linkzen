@@ -48,13 +48,13 @@ export function UserNameForm({ user }: UserNameFormProps) {
       const { status } = await updateUserNameWithId(data);
 
       if (status !== "success") {
-        toast.error("Something went wrong.", {
+        toast.error("操作失败", {
           description: "Your name was not updated. Please try again.",
         });
       } else {
         await update();
         setUpdated(false);
-        toast.success("Your name has been updated.");
+        toast.success("名称已更新");
       }
     });
   });

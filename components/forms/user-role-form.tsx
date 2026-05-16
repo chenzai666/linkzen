@@ -57,13 +57,13 @@ export function UserRoleForm({ user }: UserNameFormProps) {
       const { status } = await updateUserRoleWithId(data);
 
       if (status !== "success") {
-        toast.error("Something went wrong.", {
+        toast.error("操作失败", {
           description: "Your role was not updated. Please try again.",
         });
       } else {
         await update();
         setUpdated(false);
-        toast.success("Your role has been updated.");
+        toast.success("角色已更新");
       }
     });
   };
