@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { ShortUrlFormData } from "@/lib/dto/short-urls";
 import { Button } from "@/components/ui/button";
@@ -120,6 +121,78 @@ export const useJsonExport = () => {
     isExporting,
     exportStatus,
   };
+};
+
+export const UrlImporter: React.FC<{
+  onRefresh: () => void;
+  action: string;
+}> = ({ onRefresh, action }) => {
+  const [isImporting, setIsImporting] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const text = await file.text();
+      const items = JSON.parse(text);
+      const list = Array.isArray(items) ? items : [items];
+
+      const apiPath = action.indexOf("admin") > -1
+        ? "/api/url/admin/import"
+        : "/api/url/import";
+
+      const res = await fetch(apiPath, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: list }),
+      });
+
+      const result = await res.json();
+      if (res.ok) {
+        const parts = [];
+        if (result.created) parts.push(`新增 ${result.created} 条`);
+        if (result.updated) parts.push(`更新 ${result.updated} 条`);
+        if (result.skipped) parts.push(`跳过 ${result.skipped} 条`);
+        toast.success(`导入完成：${parts.join("，") || "无变更"}`);
+        onRefresh();
+      } else {
+        toast.error("导入失败", { description: result });
+      }
+    } catch {
+      toast.error("文件解析失败，请确认为有效的 JSON 格式");
+    } finally {
+      setIsImporting(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  };
+
+  return (
+    <>
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".json"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+      <Button
+        variant="outline"
+        className="flex items-center gap-2 text-nowrap"
+        disabled={isImporting}
+        onClick={() => inputRef.current?.click()}
+      >
+        {isImporting ? (
+          <Icons.spinner className="size-4 animate-spin" />
+        ) : (
+          <Icons.arrowUp className="size-4" />
+        )}
+        导入
+      </Button>
+    </>
+  );
 };
 
 export const UrlExporter: React.FC<{

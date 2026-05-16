@@ -64,7 +64,7 @@ import { PaginationWrapper } from "@/components/shared/pagination";
 import QRCodeEditor from "@/components/shared/qr";
 import { TimeAgoIntl } from "@/components/shared/time-ago";
 
-import { UrlExporter } from "./export";
+import { UrlExporter, UrlImporter } from "./export";
 import UserUrlMetaInfo from "./meta";
 
 export interface UrlListProps {
@@ -708,6 +708,7 @@ export default function UserUrlsList({ user, action }: UrlListProps) {
           </TabsList>
           <div className="flex items-center justify-end gap-3">
             {renderSearchInputs()}
+            <UrlImporter action={action} onRefresh={handleRefresh} />
             <UrlExporter data={data?.list || []} />
             <Button
               variant={"outline"}
