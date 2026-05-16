@@ -83,6 +83,7 @@ export default function UsersList({ user }: UrlListProps) {
     email: "",
     userName: "",
   });
+  const [searchKeyword, setSearchKeyword] = useState("");
 
   const t = useTranslations("List");
 
@@ -142,46 +143,21 @@ export default function UsersList({ user }: UrlListProps) {
             <div className="relative w-full">
               <Input
                 className="h-8 text-xs md:text-xs"
-                placeholder="Search by email..."
-                value={searchParams.email}
+                placeholder="搜索用户名..."
+                value={searchKeyword}
                 onChange={(e) => {
-                  setSearchParams({
-                    ...searchParams,
-                    email: e.target.value,
-                  });
+                  const val = e.target.value;
+                  setSearchKeyword(val);
+                  setSearchParams({ email: val, userName: val });
                 }}
               />
-              {searchParams.email && (
+              {searchKeyword && (
                 <Button
                   className="absolute right-2 top-1/2 h-6 -translate-y-1/2 rounded-full px-1 text-gray-500 hover:text-gray-700"
-                  onClick={() =>
-                    setSearchParams({ ...searchParams, email: "" })
-                  }
-                  variant={"ghost"}
-                >
-                  <Icons.close className="size-3" />
-                </Button>
-              )}
-            </div>
-
-            <div className="relative w-full">
-              <Input
-                className="h-8 text-xs md:text-xs"
-                placeholder="Search by user name..."
-                value={searchParams.userName}
-                onChange={(e) => {
-                  setSearchParams({
-                    ...searchParams,
-                    userName: e.target.value,
-                  });
-                }}
-              />
-              {searchParams.userName && (
-                <Button
-                  className="absolute right-2 top-1/2 h-6 -translate-y-1/2 rounded-full px-1 text-gray-500 hover:text-gray-700"
-                  onClick={() =>
-                    setSearchParams({ ...searchParams, userName: "" })
-                  }
+                  onClick={() => {
+                    setSearchKeyword("");
+                    setSearchParams({ email: "", userName: "" });
+                  }}
                   variant={"ghost"}
                 >
                   <Icons.close className="size-3" />
@@ -196,7 +172,7 @@ export default function UsersList({ user }: UrlListProps) {
                   {t("Name")}
                 </TableHead>
                 <TableHead className="col-span-1 flex items-center font-bold sm:col-span-2">
-                  {t("Email")}
+                  {t("Username")}
                 </TableHead>
                 <TableHead className="col-span-1 hidden items-center justify-center font-bold sm:flex">
                   {t("Role")}
@@ -231,10 +207,10 @@ export default function UsersList({ user }: UrlListProps) {
                       <TooltipProvider>
                         <Tooltip delayDuration={200}>
                           <TooltipTrigger className="truncate">
-                            {user.name || "Anonymous"}
+                            {user.name || "未命名"}
                           </TooltipTrigger>
                           <TooltipContent>
-                            {user.name || "Anonymous"}
+                            {user.name || "未命名"}
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
@@ -281,9 +257,9 @@ export default function UsersList({ user }: UrlListProps) {
               ) : (
                 <EmptyPlaceholder className="shadow-none">
                   <EmptyPlaceholder.Icon name="users" />
-                  <EmptyPlaceholder.Title>No users</EmptyPlaceholder.Title>
+                  <EmptyPlaceholder.Title>暂无用户</EmptyPlaceholder.Title>
                   <EmptyPlaceholder.Description>
-                    Here don&apos;t have any user yet.
+                    还没有任何用户。
                   </EmptyPlaceholder.Description>
                 </EmptyPlaceholder>
               )}
