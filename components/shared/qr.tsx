@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  Suspense,
   useCallback,
   useEffect,
   useMemo,
@@ -13,7 +12,7 @@ import { debounce } from "lodash";
 import { useTranslations } from "next-intl";
 import { HexColorPicker } from "react-colorful";
 
-import { getQRAsCanvas, getQRAsSVGDataUri, getQRData } from "@/lib/qr";
+import { QRCodeCanvas, getQRAsCanvas, getQRAsSVGDataUri, getQRData } from "@/lib/qr";
 import { WRDO_QR_LOGO } from "@/lib/qr/constants";
 import { extractHost } from "@/lib/utils";
 
@@ -34,7 +33,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "../ui/tooltip";
-import BlurImage from "./blur-image";
 import { CopyButton } from "./copy-button";
 import { Icons } from "./icons";
 
@@ -58,27 +56,7 @@ export default function QRCodeEditor({
     hideLogo: false,
   });
 
-  const [qrCodeUrl, setQrCodeUrl] = useState("");
   const anchorRef = useRef<HTMLAnchorElement>(null);
-
-  const generateQrCodeUrl = () => {
-    const queryParams = new URLSearchParams({
-      key: params.key,
-      url: params.url,
-      size: params.size.toString(),
-      level: params.level,
-      fgColor: params.fgColor,
-      bgColor: params.bgColor,
-      margin: params.margin.toString(),
-      hideLogo: params.hideLogo.toString(),
-    });
-
-    if (params.logo) {
-      queryParams.set("logo", params.logo);
-    }
-
-    return `/api/v1/scraping/qrcode?${queryParams.toString()}`;
-  };
 
   useEffect(() => {
     setParams((prev) => ({
@@ -89,10 +67,6 @@ export default function QRCodeEditor({
       hideLogo: localStorage.getItem("qr-hide-logo") === "true",
     }));
   }, []);
-
-  useEffect(() => {
-    setQrCodeUrl(generateQrCodeUrl());
-  }, [params]);
 
   const handleColorChange = useCallback(
     debounce((color: string, type: "fgColor" | "bgColor") => {
@@ -222,7 +196,7 @@ export default function QRCodeEditor({
             ref={anchorRef}
           />
 
-          <CopyButton value={`${window.location.origin}${qrCodeUrl}`}></CopyButton>
+          <CopyButton value={params.url}></CopyButton>
         </div>
         <div className="relative mt-2 flex h-40 items-center justify-center overflow-hidden rounded-md border border-gray-300">
           <div className="absolute inset-0 h-full w-full bg-neutral-50/60 bg-[radial-gradient(#d7d9dd_1px,transparent_1px)] [background-size:8px_9px]"></div>
@@ -230,19 +204,15 @@ export default function QRCodeEditor({
             className="flex size-full items-center justify-center"
             style={{ filter: "blur(0px)", opacity: 1, willChange: "auto" }}
           >
-            <Suspense
-              fallback={<Skeleton className="h-32 w-32 rounded shadow" />}
-            >
-              {qrCodeUrl && (
-                <BlurImage
-                  src={qrCodeUrl}
-                  alt="QR Code Preview"
-                  width={128}
-                  height={128}
-                  className="h-auto max-w-full rounded"
-                />
-              )}
-            </Suspense>
+            {qrData ? (
+              <QRCodeCanvas
+                {...qrData}
+                size={128}
+                style={{ borderRadius: "4px" }}
+              />
+            ) : (
+              <Skeleton className="h-32 w-32 rounded shadow" />
+            )}
           </div>
         </div>
       </div>
