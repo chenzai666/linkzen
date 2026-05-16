@@ -3,6 +3,27 @@ require("dotenv").config();
 const { PrismaClient } = require("@prisma/client");
 const chalk = require("chalk");
 const { execSync } = require("child_process");
+const crypto = require("crypto");
+const fs = require("fs");
+const path = require("path");
+
+// 若未提供 AUTH_SECRET，自动生成并持久化到数据卷
+const secretFile = path.join(process.env.DATA_DIR || "/app/data", ".auth_secret");
+if (!process.env.AUTH_SECRET) {
+  let secret;
+  if (fs.existsSync(secretFile)) {
+    secret = fs.readFileSync(secretFile, "utf-8").trim();
+    console.log(chalk.blueBright("ℹ AUTH_SECRET loaded from data volume."));
+  } else {
+    secret = crypto.randomBytes(32).toString("base64");
+    fs.mkdirSync(path.dirname(secretFile), { recursive: true });
+    fs.writeFileSync(secretFile, secret, { mode: 0o600 });
+    console.log(chalk.greenBright("✓ AUTH_SECRET generated and saved to data volume."));
+  }
+  process.env.AUTH_SECRET = secret;
+  // 写入临时 .env 让 Next.js 服务进程也能读取
+  fs.appendFileSync("/app/.env", `\nAUTH_SECRET=${secret}\n`);
+}
 
 if (process.env.SKIP_DB_CHECK === "true") {
   console.log("Skipping database check.");
