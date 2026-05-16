@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 
 import { prisma } from "@/lib/db";
+import { getMultipleConfigs } from "@/lib/dto/system-config";
 import { hashPassword, verifyPassword } from "@/lib/utils";
 
 export async function POST(req: NextRequest) {
@@ -29,7 +30,21 @@ export async function POST(req: NextRequest) {
     const user = await prisma.user.findUnique({ where: { email: username } });
 
     if (!user) {
-      return Response.json("User not found", { status: 404 });
+      // 用户不存在，检查是否开放注册
+      const configs = await getMultipleConfigs(["enable_user_registration"]);
+      if (!configs.enable_user_registration) {
+        return Response.json("Registration is closed", { status: 403 });
+      }
+      const newUser = await prisma.user.create({
+        data: {
+          email: username,
+          name: username,
+          password: hashPassword(password),
+          role: "USER",
+          active: 1,
+        },
+      });
+      return Response.json(newUser, { status: 200 });
     }
 
     if (user.active === 0) {
