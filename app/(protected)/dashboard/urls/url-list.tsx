@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { User } from "@prisma/client";
@@ -20,8 +20,20 @@ import {
   removeUrlPrefix,
 } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -74,15 +86,15 @@ export interface UrlListProps {
 
 function TableColumnSekleton() {
   return (
-    <TableRow className="grid grid-cols-3 items-center sm:grid-cols-11">
-      <TableCell className="col-span-1 sm:col-span-2">
-        <Skeleton className="h-5 w-20" />
+    <TableRow className="grid grid-cols-4 items-center sm:grid-cols-12">
+      <TableCell className="col-span-1 flex items-center">
+        <Skeleton className="h-4 w-4" />
       </TableCell>
       <TableCell className="col-span-1 sm:col-span-2">
         <Skeleton className="h-5 w-20" />
       </TableCell>
-      <TableCell className="col-span-1 hidden sm:flex">
-        <Skeleton className="h-5 w-16" />
+      <TableCell className="col-span-1 sm:col-span-2">
+        <Skeleton className="h-5 w-20" />
       </TableCell>
       <TableCell className="col-span-1 hidden sm:flex">
         <Skeleton className="h-5 w-16" />
@@ -96,7 +108,10 @@ function TableColumnSekleton() {
       <TableCell className="col-span-1 hidden sm:flex">
         <Skeleton className="h-5 w-16" />
       </TableCell>
-      <TableCell className="col-span-1 flex">
+      <TableCell className="col-span-1 hidden sm:flex">
+        <Skeleton className="h-5 w-16" />
+      </TableCell>
+      <TableCell className="col-span-1 flex sm:col-span-2">
         <Skeleton className="h-5 w-16" />
       </TableCell>
     </TableRow>
@@ -127,6 +142,9 @@ export default function UserUrlsList({ user, action }: UrlListProps) {
   const [currentListClickData, setCurrentListClickData] = useState<
     Record<string, number>
   >({});
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
+  const selectAllRef = useRef<HTMLButtonElement>(null);
 
   const [searchType, setSearchType] = useState<"slug" | "target" | "userName">(
     "slug",
@@ -172,6 +190,65 @@ export default function UserUrlsList({ user, action }: UrlListProps) {
       `${action}?page=${currentPage}&size=${pageSize}&slug=${searchParams.slug}&userName=${searchParams.userName}&target=${searchParams.target}`,
       undefined,
     );
+  };
+
+  const currentPageIds = useMemo(
+    () => data?.list?.map((i) => i.id ?? "").filter(Boolean) ?? [],
+    [data?.list],
+  );
+  const allPageSelected =
+    currentPageIds.length > 0 &&
+    currentPageIds.every((id) => selectedIds.has(id));
+  const somePageSelected =
+    currentPageIds.some((id) => selectedIds.has(id)) && !allPageSelected;
+
+  const handleToggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allPageSelected) {
+        currentPageIds.forEach((id) => next.delete(id));
+      } else {
+        currentPageIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  };
+
+  const handleBatchDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setIsDeleting(true);
+    const isAdmin = action.indexOf("admin") > -1;
+    const apiPath = isAdmin
+      ? "/api/url/admin/batch-delete"
+      : "/api/url/batch-delete";
+    try {
+      const res = await fetch(apiPath, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: Array.from(selectedIds) }),
+      });
+      const result = await res.json();
+      if (res.ok) {
+        toast.success(`已删除 ${result.deleted} 条`);
+        setSelectedIds(new Set());
+        handleRefresh();
+      } else {
+        toast.error("批量删除失败");
+      }
+    } catch {
+      toast.error("批量删除失败");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleChangeStatu = async (checked: boolean, id: string) => {
@@ -323,7 +400,16 @@ export default function UserUrlsList({ user, action }: UrlListProps) {
   const rendeList = () => (
     <Table>
       <TableHeader className="bg-gray-100/50 dark:bg-primary-foreground">
-        <TableRow className="grid grid-cols-3 items-center sm:grid-cols-11">
+        <TableRow className="grid grid-cols-4 items-center sm:grid-cols-12">
+          <TableHead className="col-span-1 flex items-center">
+            <Checkbox
+              ref={selectAllRef}
+              checked={allPageSelected}
+              data-state={somePageSelected ? "indeterminate" : undefined}
+              onCheckedChange={handleSelectAll}
+              aria-label="全选当前页"
+            />
+          </TableHead>
           <TableHead className="col-span-1 flex items-center font-bold sm:col-span-2">
             {t("Slug")}
           </TableHead>
@@ -362,7 +448,14 @@ export default function UserUrlsList({ user, action }: UrlListProps) {
         ) : data && data.list && data.list.length ? (
           data.list.map((short) => (
             <div className="border-b" key={short.id}>
-              <TableRow className="grid grid-cols-3 items-center sm:grid-cols-11">
+              <TableRow className="grid grid-cols-4 items-center sm:grid-cols-12">
+                <TableCell className="col-span-1 flex items-center">
+                  <Checkbox
+                    checked={selectedIds.has(short.id ?? "")}
+                    onCheckedChange={() => handleToggleSelect(short.id ?? "")}
+                    aria-label="选择此行"
+                  />
+                </TableCell>
                 <TableCell className="col-span-1 flex items-center gap-1 sm:col-span-2">
                   <Link
                     className="overflow-hidden text-ellipsis whitespace-normal text-slate-600 hover:text-blue-400 hover:underline dark:text-slate-400"
@@ -740,6 +833,58 @@ export default function UserUrlsList({ user, action }: UrlListProps) {
         </div>
 
         {pathname !== "/dashboard" && <UrlStatus action={action} />}
+
+        {selectedIds.size > 0 && (
+          <div className="flex items-center gap-3 rounded-lg border bg-muted/50 px-4 py-2">
+            <span className="text-sm text-muted-foreground">
+              已选 {selectedIds.size} 条
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={() => setSelectedIds(new Set())}
+            >
+              取消选择
+            </Button>
+            <div className="ml-auto">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    className="h-7 gap-1 text-xs"
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? (
+                      <Icons.spinner className="size-3 animate-spin" />
+                    ) : (
+                      <Icons.trash className="size-3" />
+                    )}
+                    删除所选
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>确认批量删除</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      即将删除 {selectedIds.size} 条短链接，此操作不可撤销。
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>取消</AlertDialogCancel>
+                    <AlertDialogAction
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={handleBatchDelete}
+                    >
+                      确认删除
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </div>
+        )}
 
         <TabsContent className="mt-0 space-y-3" value="List">
           {rendeList()}
