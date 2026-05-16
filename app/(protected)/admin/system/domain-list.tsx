@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { User } from "@prisma/client";
 import { useTranslations } from "next-intl";
@@ -10,8 +10,20 @@ import useSWR, { useSWRConfig } from "swr";
 import { DomainFormData } from "@/lib/dto/domains";
 import { fetcher } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,7 +57,10 @@ export interface DomainListProps {
 
 function TableColumnSekleton() {
   return (
-    <TableRow className="grid grid-cols-4 items-center sm:grid-cols-7">
+    <TableRow className="grid grid-cols-5 items-center sm:grid-cols-8">
+      <TableCell className="col-span-1 flex items-center">
+        <Skeleton className="h-4 w-4" />
+      </TableCell>
       <TableCell className="col-span-1 flex">
         <Skeleton className="h-5 w-20" />
       </TableCell>
@@ -87,6 +102,8 @@ export default function DomainList({ user, action }: DomainListProps) {
     target: "",
     userName: "",
   });
+  const [selectedNames, setSelectedNames] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { mutate } = useSWRConfig();
   const { data, isLoading } = useSWR<{
@@ -127,6 +144,57 @@ export default function DomainList({ user, action }: DomainListProps) {
       }
     } else {
       toast.error("状态更新失败");
+    }
+  };
+
+  const currentPageNames = useMemo(
+    () => data?.list?.map((d) => d.domain_name) ?? [],
+    [data?.list],
+  );
+  const allPageSelected =
+    currentPageNames.length > 0 &&
+    currentPageNames.every((n) => selectedNames.has(n));
+  const somePageSelected =
+    currentPageNames.some((n) => selectedNames.has(n)) && !allPageSelected;
+
+  const handleToggleSelect = (name: string) => {
+    setSelectedNames((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name); else next.add(name);
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => {
+    setSelectedNames((prev) => {
+      const next = new Set(prev);
+      if (allPageSelected) currentPageNames.forEach((n) => next.delete(n));
+      else currentPageNames.forEach((n) => next.add(n));
+      return next;
+    });
+  };
+
+  const handleBatchDelete = async () => {
+    if (selectedNames.size === 0) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch("/api/admin/domain/batch-delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ domain_names: Array.from(selectedNames) }),
+      });
+      const result = await res.json();
+      if (res.ok) {
+        toast.success(`已删除 ${result.deleted} 个域名`);
+        setSelectedNames(new Set());
+        handleRefresh();
+      } else {
+        toast.error("批量删除失败");
+      }
+    } catch {
+      toast.error("批量删除失败");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -218,9 +286,69 @@ export default function DomainList({ user, action }: DomainListProps) {
             </div>
           </div>
 
+          {selectedNames.size > 0 && (
+            <div className="mb-2 flex items-center gap-3 rounded-lg border bg-muted/50 px-4 py-2">
+              <span className="text-sm text-muted-foreground">
+                已选 {selectedNames.size} 个域名
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => setSelectedNames(new Set())}
+              >
+                取消选择
+              </Button>
+              <div className="ml-auto">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="h-7 gap-1 text-xs"
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? (
+                        <Icons.spinner className="size-3 animate-spin" />
+                      ) : (
+                        <Icons.trash className="size-3" />
+                      )}
+                      删除所选
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>确认批量删除</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        即将删除 {selectedNames.size} 个域名，此操作不可撤销。
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>取消</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={handleBatchDelete}
+                      >
+                        确认删除
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
+          )}
+
           <Table>
             <TableHeader className="bg-gray-100/50 dark:bg-primary-foreground">
-              <TableRow className="grid grid-cols-4 items-center text-xs sm:grid-cols-7">
+              <TableRow className="grid grid-cols-5 items-center text-xs sm:grid-cols-8">
+                <TableHead className="col-span-1 flex items-center">
+                  <Checkbox
+                    checked={allPageSelected}
+                    data-state={somePageSelected ? "indeterminate" : undefined}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="全选当前页"
+                  />
+                </TableHead>
                 <TableHead className="col-span-1 flex items-center font-bold">
                   {t("Domain Name")}
                 </TableHead>
@@ -230,7 +358,7 @@ export default function DomainList({ user, action }: DomainListProps) {
                 <TableHead className="col-span-1 hidden items-center text-nowrap font-bold sm:flex">
                   {t("Subdomain Service")}
                 </TableHead>
-                <TableHead className="col-span-1 flex items-center text-nowrap font-bold">
+                <TableHead className="col-span-1 hidden items-center text-nowrap font-bold sm:flex">
                   {t("Active")}
                 </TableHead>
                 <TableHead className="col-span-1 flex items-center font-bold">
@@ -253,7 +381,14 @@ export default function DomainList({ user, action }: DomainListProps) {
               ) : data && data.list && data.list.length ? (
                 data.list.map((domain) => (
                   <div className="border-b" key={domain.id}>
-                    <TableRow className="grid grid-cols-4 items-center sm:grid-cols-7">
+                    <TableRow className="grid grid-cols-5 items-center sm:grid-cols-8">
+                      <TableCell className="col-span-1 flex items-center">
+                        <Checkbox
+                          checked={selectedNames.has(domain.domain_name)}
+                          onCheckedChange={() => handleToggleSelect(domain.domain_name)}
+                          aria-label="选择此行"
+                        />
+                      </TableCell>
                       <TableCell className="col-span-1 flex items-center gap-1">
                         <Link
                           className="overflow-hidden text-ellipsis whitespace-normal text-slate-600 hover:text-blue-400 hover:underline dark:text-slate-400"

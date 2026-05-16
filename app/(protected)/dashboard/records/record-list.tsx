@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import { User } from "@prisma/client";
 import { PenLine } from "lucide-react";
@@ -12,8 +12,20 @@ import { UserRecordFormData } from "@/lib/dto/cloudflare-dns-record";
 import { TTL_ENUMS } from "@/lib/enums";
 import { fetcher } from "@/lib/utils";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
@@ -53,7 +65,10 @@ export interface RecordListProps {
 
 function TableColumnSekleton() {
   return (
-    <TableRow className="grid grid-cols-3 items-center sm:grid-cols-9">
+    <TableRow className="grid grid-cols-4 items-center sm:grid-cols-10">
+      <TableCell className="col-span-1 flex items-center">
+        <Skeleton className="h-4 w-4" />
+      </TableCell>
       <TableCell className="col-span-1">
         <Skeleton className="h-5 w-24" />
       </TableCell>
@@ -91,6 +106,8 @@ export default function UserRecordsList({ user, action }: RecordListProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(15);
   const isAdmin = action.includes("/admin");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const t = useTranslations("List");
 
@@ -105,6 +122,68 @@ export default function UserRecordsList({ user, action }: RecordListProps) {
 
   const handleRefresh = () => {
     mutate(`${action}?page=${currentPage}&size=${pageSize}`, undefined);
+  };
+
+  const currentPageIds = useMemo(
+    () => data?.list?.map((r) => r.id ?? "") ?? [],
+    [data?.list],
+  );
+  const allPageSelected =
+    currentPageIds.length > 0 &&
+    currentPageIds.every((id) => selectedIds.has(id));
+  const somePageSelected =
+    currentPageIds.some((id) => selectedIds.has(id)) && !allPageSelected;
+
+  const handleToggleSelect = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const handleSelectAll = () => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (allPageSelected) currentPageIds.forEach((id) => next.delete(id));
+      else currentPageIds.forEach((id) => next.add(id));
+      return next;
+    });
+  };
+
+  const handleBatchDelete = async () => {
+    if (selectedIds.size === 0) return;
+    setIsDeleting(true);
+    const selectedRecords = data?.list?.filter((r) => selectedIds.has(r.id ?? "")) ?? [];
+    const items = selectedRecords.map((r) => ({
+      record_id: r.record_id,
+      zone_id: r.zone_id,
+      active: r.active,
+      userId: r.userId,
+    }));
+    const apiPath = isAdmin ? "/api/record/admin/batch-delete" : "/api/record/batch-delete";
+    try {
+      const res = await fetch(apiPath, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items }),
+      });
+      const result = await res.json();
+      if (res.ok) {
+        const msg = result.failed > 0
+          ? `已删除 ${result.deleted} 条，失败 ${result.failed} 条`
+          : `已删除 ${result.deleted} 条`;
+        toast.success(msg);
+        setSelectedIds(new Set());
+        handleRefresh();
+      } else {
+        toast.error("批量删除失败");
+      }
+    } catch {
+      toast.error("批量删除失败");
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const handleChangeStatu = async (
@@ -203,9 +282,69 @@ export default function UserRecordsList({ user, action }: RecordListProps) {
           </div>
         </CardHeader>
         <CardContent>
+          {selectedIds.size > 0 && (
+            <div className="mb-2 flex items-center gap-3 rounded-lg border bg-muted/50 px-4 py-2">
+              <span className="text-sm text-muted-foreground">
+                已选 {selectedIds.size} 条记录
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => setSelectedIds(new Set())}
+              >
+                取消选择
+              </Button>
+              <div className="ml-auto">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="h-7 gap-1 text-xs"
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? (
+                        <Icons.spinner className="size-3 animate-spin" />
+                      ) : (
+                        <Icons.trash className="size-3" />
+                      )}
+                      删除所选
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>确认批量删除</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        即将删除 {selectedIds.size} 条子域名记录，此操作不可撤销。
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>取消</AlertDialogCancel>
+                      <AlertDialogAction
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={handleBatchDelete}
+                      >
+                        确认删除
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
+          )}
+
           <Table>
             <TableHeader className="bg-gray-100/50 dark:bg-primary-foreground">
-              <TableRow className="grid grid-cols-3 items-center sm:grid-cols-9">
+              <TableRow className="grid grid-cols-4 items-center sm:grid-cols-10">
+                <TableHead className="col-span-1 flex items-center">
+                  <Checkbox
+                    checked={allPageSelected}
+                    data-state={somePageSelected ? "indeterminate" : undefined}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="全选当前页"
+                  />
+                </TableHead>
                 <TableHead className="col-span-1 flex items-center font-bold">
                   {t("Type")}
                 </TableHead>
@@ -245,8 +384,15 @@ export default function UserRecordsList({ user, action }: RecordListProps) {
                 data.list.map((record) => (
                   <TableRow
                     key={record.id}
-                    className="grid animate-fade-in grid-cols-3 items-center animate-in sm:grid-cols-9"
+                    className="grid animate-fade-in grid-cols-4 items-center animate-in sm:grid-cols-10"
                   >
+                    <TableCell className="col-span-1 flex items-center">
+                      <Checkbox
+                        checked={selectedIds.has(record.id ?? "")}
+                        onCheckedChange={() => handleToggleSelect(record.id ?? "")}
+                        aria-label="选择此行"
+                      />
+                    </TableCell>
                     <TableCell className="col-span-1">
                       <Badge className="text-xs" variant="outline">
                         {record.type}
