@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
@@ -49,6 +49,7 @@ export function UserAuthForm({ className, type, ...props }: UserAuthFormProps) {
     React.useState<boolean>(false);
   const [suffixWhiteList, setSuffixWhiteList] = React.useState<string[]>([]);
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const t = useTranslations("Auth");
 
@@ -129,8 +130,7 @@ export function UserAuthForm({ className, type, ...props }: UserAuthFormProps) {
         });
       } else {
         toast.success(t("Welcome back!"));
-        window.location.reload();
-        // router.push(searchParams?.get("from") || "/dashboard");
+        router.push(searchParams?.get("from") || "/dashboard");
       }
     });
   }

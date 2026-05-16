@@ -1,8 +1,10 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import { auth } from "@/auth";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -14,7 +16,11 @@ export const metadata: Metadata = {
   description: "Login to your account",
 };
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await auth();
+  if (session?.user) {
+    redirect("/dashboard");
+  }
   const t = useTranslations("Auth");
   return (
     <div className="flex h-full flex-col items-center justify-center">
