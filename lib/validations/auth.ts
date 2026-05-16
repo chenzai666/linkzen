@@ -11,7 +11,7 @@ export const userPasswordAuthSchema = z.object({
 });
 
 export const updateUserSchema = z.object({
-  email: z.string().email(),
+  email: z.string().min(1, "请输入用户名"),
   image: z.string().optional(),
   name: z.string(),
   active: z.number().default(1),

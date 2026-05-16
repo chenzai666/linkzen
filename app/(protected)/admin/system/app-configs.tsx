@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
 import pkg from "package.json";
 import { toast } from "sonner";
@@ -33,14 +32,12 @@ export default function AppConfigs({}: {}) {
     mutate,
   } = useSWR<Record<string, any>>("/api/admin/configs", fetcher);
   const [notification, setNotification] = useState("");
-  const [emailSuffix, setEmailSuffix] = useState("");
 
   const t = useTranslations("Setting");
 
   useEffect(() => {
     if (!isLoading && configs) {
       setNotification(configs?.system_notification);
-      setEmailSuffix(configs?.email_registration_suffix_limit_white_list);
     }
 
     if (!isLoading) {
@@ -121,7 +118,7 @@ export default function AppConfigs({}: {}) {
                     <div className="flex items-center justify-between gap-3 transition-all duration-100 hover:cursor-pointer hover:shadow-sm">
                       <p className="flex items-center gap-2 text-sm">
                         <Icons.pwdKey className="size-4" />
-                        {t("Email Password")}
+                        {t("Username Password")}
                       </p>
                       <Switch
                         defaultChecked={configs.enable_email_password_login}
@@ -194,92 +191,6 @@ export default function AppConfigs({}: {}) {
               </CollapsibleContent>
             </Collapsible>
 
-            <Collapsible>
-              <CollapsibleTrigger className="flex w-full items-center justify-between space-x-2">
-                <div className="space-y-1 leading-none">
-                  <p className="flex items-center gap-2 font-medium">
-                    {t("Email Suffix Limit")}
-                  </p>
-                  <p className="text-start text-xs text-muted-foreground">
-                    {t(
-                      "Enable eamil suffix limit, only works for resend email login and email password login methods",
-                    )}
-                  </p>
-                </div>
-                {configs && (
-                  <div
-                    className="ml-auto flex items-center gap-3"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {configs.enable_email_registration_suffix_limit &&
-                      !configs.email_registration_suffix_limit_white_list && (
-                        <Badge variant="yellow">
-                          <Icons.warning className="mr-1 size-3" />{" "}
-                          {t("Need to configure")}
-                        </Badge>
-                      )}
-                    <Switch
-                      defaultChecked={
-                        configs.enable_email_registration_suffix_limit
-                      }
-                      onCheckedChange={(v) =>
-                        handleChange(
-                          v,
-                          "enable_email_registration_suffix_limit",
-                          "BOOLEAN",
-                        )
-                      }
-                    />
-                    <Icons.chevronDown className="size-4" />
-                  </div>
-                )}
-              </CollapsibleTrigger>
-              <CollapsibleContent className="mt-4 space-y-4 rounded-md border p-4 shadow-md">
-                <div className="flex flex-col items-start justify-start gap-3">
-                  <div className="space-y-1 leading-none">
-                    <p className="font-medium">
-                      {t("Email Suffix White List")}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {t(
-                        "Set email suffix white list, split by comma, such as: gmail-com,yahoo-com,hotmail-com",
-                      )}
-                    </p>
-                  </div>
-                  {configs && (
-                    <div className="flex w-full items-start gap-2">
-                      <Textarea
-                        className="h-16 max-h-32 min-h-9 resize-y bg-white dark:bg-neutral-700"
-                        placeholder="gmail.com,yahoo.com,hotmail.com"
-                        rows={5}
-                        value={emailSuffix}
-                        disabled={
-                          !configs.enable_email_registration_suffix_limit
-                        }
-                        onChange={(e) => setEmailSuffix(e.target.value)}
-                      />
-                      <Button
-                        className="h-9 text-nowrap"
-                        disabled={
-                          isPending ||
-                          emailSuffix ===
-                            configs.email_registration_suffix_limit_white_list
-                        }
-                        onClick={() =>
-                          handleChange(
-                            emailSuffix,
-                            "email_registration_suffix_limit_white_list",
-                            "STRING",
-                          )
-                        }
-                      >
-                        {t("Save")}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
 
             <div className="flex flex-col items-start justify-start gap-3">
               <div className="space-y-1 leading-none">
@@ -323,23 +234,7 @@ export default function AppConfigs({}: {}) {
               className="flex items-center gap-1 text-xs text-muted-foreground/90"
               style={{ fontFamily: "Bahamas Bold" }}
             >
-              Powered by
-              <Link
-                href={siteConfig.url}
-                target="_blank"
-                rel="noreferrer"
-                className="font-medium underline-offset-2 hover:underline"
-              >
-                {siteConfig.name}
-              </Link>
-              <Link
-                href={`${siteConfig.links.github}/releases/latest`}
-                target="_blank"
-                rel="noreferrer"
-                className="font-thin underline-offset-2 hover:underline"
-              >
-                v{pkg.version}
-              </Link>
+              {siteConfig.name} v{pkg.version}
               <VersionNotifier />
             </div>
           </div>
