@@ -206,8 +206,17 @@ export default function QRCodeEditor({
           >
             {qrData ? (
               <QRCodeCanvas
-                {...qrData}
+                value={qrData.value}
                 size={128}
+                level={qrData.level}
+                bgColor={qrData.bgColor}
+                fgColor={qrData.fgColor}
+                margin={qrData.margin}
+                imageSettings={
+                  qrData.imageSettings
+                    ? { ...qrData.imageSettings, height: 32, width: 32 }
+                    : undefined
+                }
                 style={{ borderRadius: "4px" }}
               />
             ) : (
