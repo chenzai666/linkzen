@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
 import { auth } from "@/auth";
 import { siteConfig } from "@/config/site";
@@ -21,7 +21,7 @@ export default async function LoginPage() {
   if (session?.user) {
     redirect("/dashboard");
   }
-  const t = useTranslations("Auth");
+  const t = await getTranslations("Auth");
   return (
     <div className="flex h-full flex-col items-center justify-center">
       <Link
