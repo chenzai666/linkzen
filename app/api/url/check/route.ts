@@ -27,10 +27,13 @@ export async function POST(req: Request) {
     const user = checkUserStatus(await getCurrentUser());
     if (user instanceof Response) return user;
 
-    const { ids }: { ids: string[] } = await req.json();
+    const { ids, timeout = 6 }: { ids: string[]; timeout?: number } =
+      await req.json();
     if (!Array.isArray(ids) || ids.length === 0) {
       return Response.json({ error: "ids required" }, { status: 400 });
     }
+
+    const timeoutMs = Math.min(Math.max(Number(timeout) || 6, 1), 30) * 1000;
 
     const urls = await prisma.userUrl.findMany({
       where: {
@@ -43,14 +46,23 @@ export async function POST(req: Request) {
     const results = await Promise.all(
       urls.map(async ({ id, target, url }) => {
         if (isPrivateUrl(target)) {
-          return { id, url, target, status: 0, ok: false, duration: 0, error: "blocked" };
+          return {
+            id,
+            url,
+            target,
+            status: 0,
+            ok: false,
+            duration: 0,
+            error: "blocked",
+            checkedAt: new Date().toISOString(),
+          };
         }
         const start = Date.now();
         try {
           const res = await fetch(target, {
             method: "GET",
             redirect: "follow",
-            signal: AbortSignal.timeout(8000),
+            signal: AbortSignal.timeout(timeoutMs),
             headers: { "User-Agent": "Mozilla/5.0 LinkZen-Checker/1.0" },
           });
           return {
@@ -70,7 +82,7 @@ export async function POST(req: Request) {
             status: 0,
             ok: false,
             duration: Date.now() - start,
-            error: e?.name === "TimeoutError" ? "timeout" : "error",
+            error: e?.name === "TimeoutError" ? "timeout" : "network_error",
             checkedAt: new Date().toISOString(),
           };
         }
