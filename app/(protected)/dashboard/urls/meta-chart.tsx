@@ -4,12 +4,22 @@ import * as React from "react";
 import { useState } from "react";
 import Link from "next/link";
 import { UrlMeta, User } from "@prisma/client";
-import { VisSingleContainer, VisTooltip, VisTopoJSONMap } from "@unovis/react";
+import {
+  VisSingleContainer,
+  VisTooltip,
+  VisTopoJSONMap,
+} from "@unovis/react";
 import { TopoJSONMap } from "@unovis/ts";
 import { WorldMapTopoJSON } from "@unovis/ts/maps";
 import { useTranslations } from "next-intl";
+import { Flame, MousePointerClick, Users } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import useSWR from "swr";
+
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 import {
   getBotName,
@@ -20,21 +30,15 @@ import {
   getRegionName,
 } from "@/lib/contries";
 import { DATE_DIMENSION_ENUMS } from "@/lib/enums";
-import { fetcher, isLink, removeUrlPrefix } from "@/lib/utils";
+import { isLink, removeUrlPrefix } from "@/lib/utils";
 import { useElementSize } from "@/hooks/use-element-size";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
 import {
   Select,
   SelectContent,
@@ -44,19 +48,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Icons } from "@/components/shared/icons";
 import { TimeAgoIntl } from "@/components/shared/time-ago";
-
-const chartConfig = {
-  pv: {
-    label: "Views",
-    color: "hsl(var(--chart-2))",
-  },
-  uv: {
-    label: "Visits",
-    color: "hsl(var(--chart-1))",
-  },
-};
 
 function processUrlMeta(urlMetaArray: UrlMeta[]) {
   const dailyData: { [key: string]: { clicks: number; ips: Set<string> } } = {};
@@ -65,44 +57,67 @@ function processUrlMeta(urlMetaArray: UrlMeta[]) {
     const createdDate = new Date(meta.createdAt).toISOString().split("T")[0];
     const updatedDate = new Date(meta.updatedAt).toISOString().split("T")[0];
 
-    // Record for created date
     if (!dailyData[createdDate]) {
       dailyData[createdDate] = { clicks: 0, ips: new Set<string>() };
     }
     dailyData[createdDate].clicks += 1;
     dailyData[createdDate].ips.add(meta.ip);
 
-    // If updated date is different, record additional clicks on that date
     if (createdDate !== updatedDate) {
       if (!dailyData[updatedDate]) {
         dailyData[updatedDate] = { clicks: 0, ips: new Set<string>() };
       }
-      dailyData[updatedDate].clicks += meta.click - 1; // Subtract the initial click
+      dailyData[updatedDate].clicks += meta.click - 1;
       dailyData[updatedDate].ips.add(meta.ip);
     }
   });
 
-  return Object.entries(dailyData).map(([date, data]) => ({
-    date,
-    clicks: data.clicks,
-    uniqueIPs: data.ips.size,
-    ips: Array.from(data.ips),
-  }));
+  return Object.entries(dailyData)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, data]) => ({
+      date,
+      visits: data.clicks,
+      visitors: data.ips.size,
+    }));
 }
 
-function calculateUVAndPV(logs: UrlMeta[]) {
+function calculateCounters(data: UrlMeta[]) {
   const uniqueIps = new Set<string>();
+  const uniqueReferrers = new Set<string>();
   let totalClicks = 0;
 
-  logs.forEach((log) => {
+  data.forEach((log) => {
     uniqueIps.add(log.ip);
     totalClicks += log.click;
+    if (log.referer) uniqueReferrers.add(log.referer);
   });
 
   return {
-    uv: uniqueIps.size,
-    pv: totalClicks,
+    visits: totalClicks,
+    visitors: uniqueIps.size,
+    referrers: uniqueReferrers.size,
   };
+}
+
+function calculateHeatmap(data: UrlMeta[], metric: "visits" | "visitors") {
+  const grid: Record<string, { visits: number; visitors: Set<string> }> = {};
+
+  data.forEach((item) => {
+    const date = new Date(item.createdAt);
+    // getDay(): 0=Sun,1=Mon..6=Sat → convert to ISO 1=Mon..7=Sun
+    const rawDay = date.getDay();
+    const weekday = rawDay === 0 ? 7 : rawDay;
+    const hour = date.getHours();
+    const key = `${weekday}-${hour}`;
+
+    if (!grid[key]) {
+      grid[key] = { visits: 0, visitors: new Set() };
+    }
+    grid[key].visits += item.click;
+    grid[key].visitors.add(item.ip);
+  });
+
+  return grid;
 }
 
 interface Stat {
@@ -115,36 +130,31 @@ function generateStatsList(
   records: UrlMeta[],
   dimension: keyof UrlMeta,
 ): Stat[] {
-  // 统计每个维度的点击总数
   const dimensionCounts: { [key: string]: number } = {};
   let totalClicks = 0;
 
-  // 第一步：遍历记录，累加点击数
   records.forEach((record) => {
-    // 获取维度值，默认为 "Unknown" 如果未定义
     const rawValue = record[dimension] || "Unknown";
     const dimValue =
       dimension === "country"
-        ? getCountryName(rawValue as string) // 国家代码转为国家名称
+        ? getCountryName(rawValue as string)
         : dimension === "device"
-          ? getDeviceVendor(rawValue as string) // 设备型号转为厂商名称
+          ? getDeviceVendor(rawValue as string)
           : dimension === "engine"
-            ? getEngineName(rawValue as string) // 引擎名称
+            ? getEngineName(rawValue as string)
             : dimension === "region"
-              ? getRegionName(rawValue as string) // 区域名称
+              ? getRegionName(rawValue as string)
               : dimension === "lang"
-                ? getLanguageName(rawValue as string) // 语言名称
+                ? getLanguageName(rawValue as string)
                 : dimension === "isBot"
-                  ? getBotName(rawValue as boolean) // 是否为机器人
-                  : rawValue; // 其他维度直接使用原始值
+                  ? getBotName(rawValue as boolean)
+                  : rawValue;
 
-    const click = record.click || 0; // 确保 click 是数字，默认 0 如果未定义
-
+    const click = record.click || 0;
     dimensionCounts[dimValue] = (dimensionCounts[dimValue] || 0) + click;
     totalClicks += click;
   });
 
-  // 第二步：生成统计列表并计算百分比
   const statsList: Stat[] = Object.entries(dimensionCounts).map(
     ([dimValue, clicks]) => {
       const percentage = totalClicks > 0 ? (clicks / totalClicks) * 100 : 0;
@@ -156,10 +166,161 @@ function generateStatsList(
     },
   );
 
-  // 第三步：按百分比降序排序
   statsList.sort((a, b) => parseFloat(b.percentage) - parseFloat(a.percentage));
-
   return statsList;
+}
+
+// 热力图组件
+function HeatmapChart({
+  data,
+  metric,
+}: {
+  data: UrlMeta[];
+  metric: "visits" | "visitors";
+}) {
+  const grid = calculateHeatmap(data, metric);
+  const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+
+  // 计算最大值用于归一化
+  let maxValue = 0;
+  for (const cell of Object.values(grid)) {
+    const val = metric === "visits" ? cell.visits : cell.visitors.size;
+    if (val > maxValue) maxValue = val;
+  }
+
+  function getCellValue(weekday: number, hour: number) {
+    const key = `${weekday}-${hour}`;
+    const cell = grid[key];
+    if (!cell) return 0;
+    return metric === "visits" ? cell.visits : cell.visitors.size;
+  }
+
+  function getCellOpacity(weekday: number, hour: number) {
+    const value = getCellValue(weekday, hour);
+    if (value === 0 || maxValue === 0) return 0.05;
+    return Math.max(0.15, value / maxValue);
+  }
+
+  return (
+    <div className="overflow-x-auto">
+      <div className="min-w-[600px]">
+        {/* 小时标签 */}
+        <div className="mb-1 flex pl-10">
+          {hours.map((h) => (
+            <div
+              key={h}
+              className="flex-1 text-center text-[10px] text-muted-foreground"
+            >
+              {h % 6 === 0 ? h : ""}
+            </div>
+          ))}
+        </div>
+        {/* 热力图主体 */}
+        {weekdays.map((day, idx) => (
+          <div key={day} className="mb-1 flex items-center gap-1">
+            <div className="w-9 shrink-0 text-right text-[10px] text-muted-foreground">
+              {day}
+            </div>
+            {hours.map((h) => {
+              const weekday = idx + 1;
+              const val = getCellValue(weekday, h);
+              const opacity = getCellOpacity(weekday, h);
+              return (
+                <div
+                  key={h}
+                  title={`${day} ${h}:00 — ${val}`}
+                  className="h-5 flex-1 rounded-sm transition-opacity"
+                  style={{
+                    backgroundColor: `hsl(var(--chart-1) / ${opacity})`,
+                  }}
+                />
+              );
+            })}
+          </div>
+        ))}
+        {/* 图例 */}
+        <div className="mt-2 flex items-center justify-end gap-1 text-[10px] text-muted-foreground">
+          <span>Less</span>
+          {[0.05, 0.2, 0.4, 0.6, 0.85].map((o) => (
+            <div
+              key={o}
+              className="h-3 w-3 rounded-sm"
+              style={{ backgroundColor: `hsl(var(--chart-1) / ${o})` }}
+            />
+          ))}
+          <span>More</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const trendChartConfig = {
+  visits: { label: "Views", color: "hsl(var(--chart-1))" },
+  visitors: { label: "Visitors", color: "hsl(var(--chart-2))" },
+};
+
+// 趋势图（recharts）
+function TrendChart({ data }: { data: UrlMeta[] }) {
+  const processed = processUrlMeta(data);
+
+  return (
+    <ChartContainer config={trendChartConfig} className="aspect-auto h-[200px] w-full">
+      <AreaChart data={processed} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+        <defs>
+          <linearGradient id="trendVisits" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.4} />
+            <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
+          </linearGradient>
+          <linearGradient id="trendVisitors" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="hsl(var(--chart-2))" stopOpacity={0.4} />
+            <stop offset="95%" stopColor="hsl(var(--chart-2))" stopOpacity={0} />
+          </linearGradient>
+        </defs>
+        <CartesianGrid vertical={false} />
+        <XAxis
+          dataKey="date"
+          tickLine={false}
+          axisLine={false}
+          tickMargin={8}
+          minTickGap={32}
+          tickFormatter={(value) =>
+            new Date(value).toLocaleDateString("zh-CN", { month: "short", day: "numeric" })
+          }
+        />
+        <YAxis width={28} axisLine={false} tickLine={false} />
+        <ChartTooltip
+          content={
+            <ChartTooltipContent
+              className="w-[160px]"
+              labelFormatter={(value) =>
+                new Date(value).toLocaleDateString("zh-CN", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })
+              }
+            />
+          }
+        />
+        <Area
+          type="monotone"
+          dataKey="visits"
+          stroke="hsl(var(--chart-1))"
+          strokeWidth={2}
+          fill="url(#trendVisits)"
+        />
+        <Area
+          type="monotone"
+          dataKey="visitors"
+          stroke="hsl(var(--chart-2))"
+          strokeWidth={2}
+          fill="url(#trendVisitors)"
+        />
+      </AreaChart>
+    </ChartContainer>
+  );
 }
 
 export function DailyPVUVChart({
@@ -174,18 +335,12 @@ export function DailyPVUVChart({
   user: Pick<User, "id" | "name">;
 }) {
   const { ref: wrapperRef, width: wrapperWidth } = useElementSize();
-  const [activeChart, setActiveChart] =
-    React.useState<keyof typeof chartConfig>("pv");
+  const [viewMode, setViewMode] = useState<"trend" | "heatmap">("trend");
+  const [heatmapMetric, setHeatmapMetric] = useState<"visits" | "visitors">("visits");
 
   const t = useTranslations("Components");
 
-  const processedData = processUrlMeta(data).map((entry) => ({
-    date: entry.date,
-    pv: entry.clicks,
-    uv: new Set(entry.ips).size,
-  }));
-
-  const dataTotal = calculateUVAndPV(data);
+  const counters = calculateCounters(data);
 
   const latestEntry = data[data.length - 1];
   const latestFrom = [
@@ -193,40 +348,28 @@ export function DailyPVUVChart({
     latestEntry.country ? `${getCountryName(latestEntry.country)}` : "",
   ]
     .filter(Boolean)
-    .join(",");
+    .join(", ");
 
-  // const pointData = data.map((item) => ({
-  //   id: item.id,
-  //   city: item.city,
-  //   latitude: item.latitude,
-  //   longitude: item.longitude,
-  //   clicks: item.click,
-  // }));
-  // const pointLabel = (d: any) => d.city;
+  const lastVisitorInfo = t.rich("last-visitor-info", {
+    location: latestFrom,
+    timeAgo: () => <TimeAgoIntl date={latestEntry.updatedAt} />,
+  });
 
-  // 计算每个国家的点击次数
+  // 计算国家点击次数（世界地图）
   const countryClicks: { [key: string]: number } = {};
   data.forEach((item) => {
-    const country = item.country;
-    if (country) {
-      if (!countryClicks[country]) {
-        countryClicks[country] = 0;
-      }
-      countryClicks[country] += item.click;
+    if (item.country) {
+      countryClicks[item.country] = (countryClicks[item.country] || 0) + item.click;
     }
   });
 
-  const areaData = Object.entries(countryClicks).map(
-    ([country, clicks], index) => ({
-      id: country,
-      // color: getColorByClicks(clicks, index, countryClicks),
-    }),
-  );
+  const areaData = Object.entries(countryClicks).map(([country]) => ({
+    id: country,
+  }));
 
   const triggers = {
     [TopoJSONMap.selectors.feature]: (d: any) =>
       `${getCountryName(d.id)} · ${countryClicks[d.id] || 0}`,
-    // [TopoJSONMap.selectors.point]: (d) => decodeURIComponent(d.city),
   };
 
   const refererStats = generateStatsList(data, "referer");
@@ -241,249 +384,208 @@ export function DailyPVUVChart({
   const regionStats = generateStatsList(data, "region");
   const isBotStats = generateStatsList(data, "isBot");
 
-  const lastVisitorInfo = t.rich("last-visitor-info", {
-    location: latestFrom,
-    timeAgo: () => <TimeAgoIntl date={latestEntry.updatedAt} />,
-  });
-
   return (
-    <Card>
-      <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
-        <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-2 sm:py-3">
-          <CardTitle>{t("Link Analytics")}</CardTitle>
-          <CardDescription>{lastVisitorInfo}</CardDescription>
+    <div className="space-y-4">
+      {/* 时间范围选择器 */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold">{t("Link Analytics")}</h3>
+        <Select
+          onValueChange={(value: string) => setTimeRange(value)}
+          name="time range"
+          defaultValue={timeRange}
+        >
+          <SelectTrigger className="w-36 shadow-inner">
+            <SelectValue placeholder="Select a time" />
+          </SelectTrigger>
+          <SelectContent>
+            {DATE_DIMENSION_ENUMS.map((e, i) => (
+              <div key={e.value}>
+                <SelectItem value={e.value}>
+                  <span className="flex items-center gap-1">{t(e.label)}</span>
+                </SelectItem>
+                {i % 2 === 0 && i !== DATE_DIMENSION_ENUMS.length - 1 && (
+                  <SelectSeparator />
+                )}
+              </div>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* 计数卡片 */}
+      <div className="grid grid-cols-3 gap-3">
+        <Card className="gap-0">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t("Views")}</CardTitle>
+            <MousePointerClick className="h-4 w-4 text-muted-foreground" aria-hidden />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold tabular-nums">
+              {counters.visits.toLocaleString()}
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="gap-0">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t("Visits")}</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" aria-hidden />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold tabular-nums">
+              {counters.visitors.toLocaleString()}
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="gap-0">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t("Referrers")}</CardTitle>
+            <Flame className="h-4 w-4 text-muted-foreground" aria-hidden />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold tabular-nums">
+              {counters.referrers.toLocaleString()}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 趋势/热力图切换 */}
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "trend" | "heatmap")}>
+            <TabsList>
+              <TabsTrigger value="trend">{t("Trend")}</TabsTrigger>
+              <TabsTrigger value="heatmap">{t("Weekly Trend")}</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          {viewMode === "heatmap" && (
+            <Select
+              value={heatmapMetric}
+              onValueChange={(v) => setHeatmapMetric(v as "visits" | "visitors")}
+            >
+              <SelectTrigger className="h-8 w-32">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="visits">{t("Views")}</SelectItem>
+                <SelectItem value="visitors">{t("Visits")}</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
         </div>
-        <div className="flex items-center">
-          <Select
-            onValueChange={(value: string) => setTimeRange(value)}
-            name="time range"
-            defaultValue={timeRange}
-          >
-            <SelectTrigger className="mx-4 w-full min-w-28 shadow-inner">
-              <SelectValue placeholder="Select a time" />
-            </SelectTrigger>
-            <SelectContent>
-              {DATE_DIMENSION_ENUMS.map((e, i) => (
-                <div key={e.value}>
-                  <SelectItem value={e.value}>
-                    <span className="flex items-center gap-1">{t(e.label)}</span>
-                  </SelectItem>
-                  {i % 2 === 0 && i !== DATE_DIMENSION_ENUMS.length - 1 && (
-                    <SelectSeparator />
-                  )}
-                </div>
-              ))}
-            </SelectContent>
-          </Select>
-          {["pv", "uv"].map((key) => {
-            const chart = key as keyof typeof chartConfig;
-            return (
-              <button
-                key={chart}
-                data-active={activeChart === chart}
-                className="relative z-30 flex flex-1 flex-col items-center justify-center gap-1 border-t px-6 py-2 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-3"
-                onClick={() => setActiveChart(chart)}
+        <Card>
+          <CardContent className="p-4 pt-4">
+            {viewMode === "trend" ? (
+              <TrendChart data={data} />
+            ) : (
+              <HeatmapChart data={data} metric={heatmapMetric} />
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* 世界地图 + 指标网格 */}
+      <div ref={wrapperRef} className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+        {/* 世界地图 */}
+        <div className="lg:col-span-8">
+          <Card>
+            <CardContent className="p-3">
+              <VisSingleContainer
+                data={{ areas: areaData }}
+                width={wrapperWidth > 0 ? wrapperWidth * 0.65 : 400}
               >
-                <span className="text-nowrap text-sm font-semibold text-muted-foreground">
-                  {t(chartConfig[chart].label)}
-                </span>
-                <span className="text-lg font-bold leading-none">
-                  {dataTotal[key as keyof typeof dataTotal].toLocaleString()}
-                </span>
-              </button>
-            );
-          })}
+                <VisTopoJSONMap topojson={WorldMapTopoJSON} />
+                <VisTooltip triggers={triggers} />
+              </VisSingleContainer>
+            </CardContent>
+          </Card>
         </div>
-      </CardHeader>
-      <CardContent className="px-2 sm:p-6" ref={wrapperRef}>
-        <ChartContainer
-          config={chartConfig}
-          className="aspect-auto h-[225px] w-full"
-        >
-          <AreaChart
-            accessibilityLayer
-            data={processedData}
-            margin={{
-              top: 20,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <defs>
-              <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor={`var(--color-uv)`}
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor={`var(--color-uv)`}
-                  stopOpacity={0}
-                />
-              </linearGradient>
-              <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor={`var(--color-pv)`}
-                  stopOpacity={0.8}
-                />
-                <stop
-                  offset="95%"
-                  stopColor={`var(--color-pv)`}
-                  stopOpacity={0}
-                />
-              </linearGradient>
-            </defs>
-            <CartesianGrid vertical={false} />
-            <XAxis
-              dataKey="date"
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              minTickGap={32}
-              tickFormatter={(value) => {
-                const date = new Date(value);
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                });
-              }}
-            />
-            <YAxis width={20} axisLine={false} tickLine={false} />
-            <ChartTooltip
-              content={
-                <ChartTooltipContent
-                  className="w-[150px]"
-                  nameKey="views"
-                  labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    });
-                  }}
-                />
-              }
-            />
-            <Area
-              type="monotone"
-              dataKey="uv"
-              stroke={`var(--color-uv)`}
-              fillOpacity={1}
-              fill="url(#colorUv)"
-            />
-            <Area
-              type="monotone"
-              dataKey="pv"
-              stroke={`var(--color-pv)`}
-              fillOpacity={1}
-              fill="url(#colorPv)"
-            />
-          </AreaChart>
-        </ChartContainer>
 
-        <VisSingleContainer
-          data={{ areas: areaData }}
-          width={wrapperWidth * 0.99}
-        >
-          <VisTopoJSONMap topojson={WorldMapTopoJSON} />
-          <VisTooltip triggers={triggers} />
-        </VisSingleContainer>
+        {/* 地区分组 */}
+        <div className="lg:col-span-4">
+          <Tabs defaultValue="country">
+            <TabsList>
+              <TabsTrigger value="country">{t("Country")}</TabsTrigger>
+              <TabsTrigger value="city">{t("City")}</TabsTrigger>
+              <TabsTrigger value="region">{t("Region")}</TabsTrigger>
+            </TabsList>
+            <TabsContent value="country">
+              {countryStats.length > 0 && <StatsList data={countryStats} title="Countries" />}
+            </TabsContent>
+            <TabsContent value="city">
+              {cityStats.length > 0 && <StatsList data={cityStats} title="Cities" />}
+            </TabsContent>
+            <TabsContent value="region">
+              {regionStats.length > 0 && <StatsList data={regionStats} title="Regions" />}
+            </TabsContent>
+          </Tabs>
+        </div>
 
-        <div className="my-5 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {/* Referrers、isBotStats */}
+        {/* 来源 + 流量类型 */}
+        <div className="lg:col-span-6">
           <Tabs defaultValue="referrer">
             <TabsList>
               <TabsTrigger value="referrer">{t("Referrers")}</TabsTrigger>
               <TabsTrigger value="isBot">{t("Traffic Type")}</TabsTrigger>
             </TabsList>
-            <TabsContent className="h-[calc(100%-40px)]" value="referrer">
-              {refererStats.length > 0 && (
-                <StatsList data={refererStats} title="Referrers" />
-              )}
+            <TabsContent value="referrer">
+              {refererStats.length > 0 && <StatsList data={refererStats} title="Referrers" />}
             </TabsContent>
-            <TabsContent className="h-[calc(100%-40px)]" value="isBot">
-              {isBotStats.length > 0 && (
-                <StatsList data={isBotStats} title="Is Bot" />
-              )}
+            <TabsContent value="isBot">
+              {isBotStats.length > 0 && <StatsList data={isBotStats} title="Traffic Type" />}
             </TabsContent>
           </Tabs>
-          {/* 国家、城市 */}
-          <Tabs defaultValue="country">
+        </div>
+
+        {/* 语言 + 时区 */}
+        <div className="lg:col-span-6">
+          <Tabs defaultValue="language">
             <TabsList>
-              <TabsTrigger value="country">{t("Country")}</TabsTrigger>
-              <TabsTrigger value="city">{t("City")}</TabsTrigger>
+              <TabsTrigger value="language">{t("Language")}</TabsTrigger>
+              <TabsTrigger value="cpu">CPU</TabsTrigger>
             </TabsList>
-            <TabsContent className="h-[calc(100%-40px)]" value="country">
-              {countryStats.length > 0 && (
-                <StatsList data={countryStats} title="Countries" />
-              )}
+            <TabsContent value="language">
+              {languageStats.length > 0 && <StatsList data={languageStats} title="Languages" />}
             </TabsContent>
-            <TabsContent className="h-[calc(100%-40px)]" value="city">
-              {cityStats.length > 0 && (
-                <StatsList data={cityStats} title="Cities" />
-              )}
+            <TabsContent value="cpu">
+              {cpuStats.length > 0 && <StatsList data={cpuStats} title="CPU" />}
             </TabsContent>
           </Tabs>
-          {/* browserStats、engineStats */}
+        </div>
+
+        {/* 设备 */}
+        <div className="lg:col-span-6">
+          <Tabs defaultValue="device">
+            <TabsList>
+              <TabsTrigger value="device">{t("Device")}</TabsTrigger>
+              <TabsTrigger value="os">{t("OS")}</TabsTrigger>
+            </TabsList>
+            <TabsContent value="device">
+              {deviceStats.length > 0 && <StatsList data={deviceStats} title="Devices" />}
+            </TabsContent>
+            <TabsContent value="os">
+              {osStats.length > 0 && <StatsList data={osStats} title="OS" />}
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* 浏览器 */}
+        <div className="lg:col-span-6">
           <Tabs defaultValue="browser">
             <TabsList>
               <TabsTrigger value="browser">{t("Browser")}</TabsTrigger>
               <TabsTrigger value="engine">{t("Engine")}</TabsTrigger>
             </TabsList>
-            <TabsContent className="h-[calc(100%-40px)]" value="browser">
-              {browserStats.length > 0 && (
-                <StatsList data={browserStats} title="Browsers" />
-              )}
+            <TabsContent value="browser">
+              {browserStats.length > 0 && <StatsList data={browserStats} title="Browsers" />}
             </TabsContent>
-            <TabsContent className="h-[calc(100%-40px)]" value="engine">
-              {engineStats.length > 0 && (
-                <StatsList data={engineStats} title="Engines" />
-              )}
-            </TabsContent>
-          </Tabs>
-
-          {/* Languages、regionStats */}
-          <Tabs className="h-full" defaultValue="language">
-            <TabsList>
-              <TabsTrigger value="language">{t("Language")}</TabsTrigger>
-              <TabsTrigger value="region">{t("Region")}</TabsTrigger>
-            </TabsList>
-            <TabsContent className="h-[calc(100%-40px)]" value="language">
-              {languageStats.length > 0 && (
-                <StatsList data={languageStats} title="Languages" />
-              )}
-            </TabsContent>
-            <TabsContent className="h-[calc(100%-40px)]" value="region">
-              {regionStats.length > 0 && (
-                <StatsList data={regionStats} title="Regions" />
-              )}
-            </TabsContent>
-          </Tabs>
-          {/* deviceStats、osStats、cpuStats */}
-          <Tabs defaultValue="device">
-            <TabsList>
-              <TabsTrigger value="device">{t("Device")}</TabsTrigger>
-              <TabsTrigger value="os">{t("OS")}</TabsTrigger>
-              <TabsTrigger value="cpu">CPU</TabsTrigger>
-            </TabsList>
-            <TabsContent className="h-[calc(100%-40px)]" value="device">
-              {deviceStats.length > 0 && (
-                <StatsList data={deviceStats} title="Devices" />
-              )}
-            </TabsContent>
-            <TabsContent className="h-[calc(100%-40px)]" value="os">
-              {osStats.length > 0 && <StatsList data={osStats} title="OS" />}
-            </TabsContent>
-            <TabsContent className="h-[calc(100%-40px)]" value="cpu">
-              {cpuStats.length > 0 && <StatsList data={cpuStats} title="CPU" />}
+            <TabsContent value="engine">
+              {engineStats.length > 0 && <StatsList data={engineStats} title="Engines" />}
             </TabsContent>
           </Tabs>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
@@ -495,13 +597,11 @@ export function StatsList({ data, title }: { data: Stat[]; title: string }) {
     <div className="h-full rounded-lg border">
       <div className="flex items-center justify-between border-b px-5 py-2 text-xs font-medium text-muted-foreground">
         <span>{t("Name")}</span>
-        <span className="">{t("Visitors")}</span>
+        <span>{t("Visitors")}</span>
       </div>
       <div
-        className={`scrollbar-hidden overflow-hidden overflow-y-auto px-4 pb-4 pt-2 transition-all duration-500 ease-in-out`}
-        style={{
-          maxHeight: "18rem",
-        }}
+        className="scrollbar-hidden overflow-hidden overflow-y-auto px-4 pb-4 pt-2 transition-all duration-500 ease-in-out"
+        style={{ maxHeight: "18rem" }}
       >
         {displayedData.map((ref) => (
           <div
@@ -522,7 +622,7 @@ export function StatsList({ data, title }: { data: Stat[]; title: string }) {
                   {decodeURIComponent(ref.dimension)}
                 </p>
               )}
-              <p className="">
+              <p>
                 <span>{ref.clicks}</span>
                 <span className="ml-1 hidden animate-fade-in transition-all duration-200 group-hover:inline-block">
                   ({ref.percentage})
@@ -536,7 +636,7 @@ export function StatsList({ data, title }: { data: Stat[]; title: string }) {
                 background: `linear-gradient(to right, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.7))`,
                 opacity: parseFloat(ref.percentage) / 100 + 0.3,
               }}
-            ></div>
+            />
           </div>
         ))}
       </div>
@@ -544,7 +644,7 @@ export function StatsList({ data, title }: { data: Stat[]; title: string }) {
       {data.length > 8 && (
         <div className="mb-3 mt-1 text-center">
           <Button
-            variant={"outline"}
+            variant="outline"
             onClick={() => setShowAll(!showAll)}
             className="h-7 px-4 py-1 text-xs"
           >
@@ -555,46 +655,3 @@ export function StatsList({ data, title }: { data: Stat[]; title: string }) {
     </div>
   );
 }
-
-// const baseColors = [
-//   "#ff6b7e",
-//   "#a6cc74",
-//   "#4d8cfd",
-//   "#f4b83e",
-//   "#FF00FF",
-//   "#6859be",
-// ];
-
-// const hexToRgb = (hex: string) => {
-//   const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-//   return result
-//     ? {
-//         r: parseInt(result[1], 16),
-//         g: parseInt(result[2], 16),
-//         b: parseInt(result[3], 16),
-//       }
-//     : null;
-// };
-
-// const getColorByClicks = (
-//   clicks: number,
-//   baseColorIndex: number,
-//   countryClicks: { [key: string]: number },
-// ) => {
-//   const maxClicks = Math.max(...Object.values(countryClicks));
-//   const minClicks = Math.min(...Object.values(countryClicks));
-
-//   // 归一化点击次数
-//   const normalized =
-//     maxClicks === minClicks
-//       ? 0
-//       : (clicks - minClicks) / (maxClicks - minClicks);
-
-//   // 获取基础颜色
-//   const baseColor = hexToRgb(baseColors[baseColorIndex % baseColors.length]);
-
-//   // 最低60%透明度，最高100%不透明
-//   const alpha = 0.5 + normalized * 0.5;
-
-//   return `rgba(${baseColor!.r}, ${baseColor!.g}, ${baseColor!.b}, ${alpha})`;
-// };

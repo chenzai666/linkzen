@@ -329,6 +329,8 @@
     "OS": "操作系统",
     "CPU": "CPU",
     "Visitors": "访客",
+    "Trend": "趋势",
+    "Weekly Trend": "周趋势",
     "Name": "名称",
     "Activated Api Key users": "已激活 API Key 的用户",
     "total-requests-one-type": "Open API 的 {type1} 的总请求数",

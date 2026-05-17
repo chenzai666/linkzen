@@ -329,6 +329,8 @@
     "OS": "OS",
     "CPU": "CPU",
     "Visitors": "Visitors",
+    "Trend": "Trend",
+    "Weekly Trend": "Weekly Trend",
     "Name": "Name",
     "Activated Api Key users": "Activated Api Key users",
     "total-requests-one-type": "Total requests of {type1}",
