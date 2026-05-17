@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Icons } from "@/components/shared/icons";
+import Link from "next/link";
 
 interface CheckResult {
   id: string;
@@ -313,12 +314,13 @@ export default function LinkChecker({ user, action }: LinkCheckerProps) {
                   <TableHead className="w-[110px] text-center">结果</TableHead>
                   <TableHead className="w-[80px] text-center">耗时</TableHead>
                   <TableHead className="hidden sm:table-cell">错误</TableHead>
+                  <TableHead className="w-[120px] text-center">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredResults.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                    <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
                       {activeTab === "failed" ? "暂无异常链接 🎉" : "暂无数据"}
                     </TableCell>
                   </TableRow>
@@ -351,6 +353,28 @@ export default function LinkChecker({ user, action }: LinkCheckerProps) {
                             : r.error === "blocked"
                               ? "私有地址已屏蔽"
                               : "—"}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <Link
+                            href={r.target}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                          >
+                            <Icons.outLink className="size-3" />
+                            原链接
+                          </Link>
+                          <Link
+                            href={r.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                          >
+                            <Icons.link className="size-3" />
+                            详情
+                          </Link>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
