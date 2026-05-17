@@ -516,6 +516,7 @@ export default function UserUrlsList({ user, action }: UrlListProps) {
                     onClick={() => {
                       setSelectedUrl(short);
                       setCurrentView(short.id!);
+                      setShowStats(true);
                     }}
                   >
                     {rendeClicks(short)}
@@ -664,6 +665,7 @@ export default function UserUrlsList({ user, action }: UrlListProps) {
                     onClick={() => {
                       setSelectedUrl(short);
                       setCurrentView(short.id!);
+                      setShowStats(true);
                     }}
                   >
                     {rendeClicks(short)}
