@@ -511,7 +511,13 @@ export default function UserUrlsList({ user, action }: UrlListProps) {
                   {expirationTime(short.expiration, short.updatedAt)}
                 </TableCell>
                 <TableCell className="col-span-1 hidden truncate sm:flex">
-                  <div className="flex items-center gap-1 rounded-lg border bg-gray-50 px-2 py-1 dark:bg-gray-600/50">
+                  <div
+                    className="flex cursor-pointer items-center gap-1 rounded-lg border bg-gray-50 px-2 py-1 transition-colors hover:bg-gray-100 dark:bg-gray-600/50 dark:hover:bg-gray-500/50"
+                    onClick={() => {
+                      setSelectedUrl(short);
+                      setCurrentView(short.id!);
+                    }}
+                  >
                     {rendeClicks(short)}
                   </div>
                 </TableCell>
@@ -653,7 +659,13 @@ export default function UserUrlsList({ user, action }: UrlListProps) {
                     </div>
                   </div>
 
-                  <div className="ml-2 flex items-center gap-1 rounded-md border bg-gray-50 px-2 py-1 dark:bg-gray-600/50">
+                  <div
+                    className="ml-2 flex cursor-pointer items-center gap-1 rounded-md border bg-gray-50 px-2 py-1 transition-colors hover:bg-gray-100 dark:bg-gray-600/50 dark:hover:bg-gray-500/50"
+                    onClick={() => {
+                      setSelectedUrl(short);
+                      setCurrentView(short.id!);
+                    }}
+                  >
                     {rendeClicks(short)}
                   </div>
 
