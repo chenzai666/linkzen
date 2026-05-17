@@ -610,7 +610,8 @@
     "Resources": "Resources",
     "App Configs": "App Settings",
     "Plans": "Plan Settings",
-    "List": "List"
+    "List": "List",
+    "Link Check": "Link Check"
   },
   "Email": {
     "Search emails": "Search emails",

@@ -18,7 +18,7 @@ export default async function LinkCheckPage() {
   return (
     <LinkChecker
       user={{ id: user.id, role: user.role }}
-      action={user.role === "ADMIN" ? "/api/admin/url" : "/api/url"}
+      action={user.role === "ADMIN" ? "/api/url/admin" : "/api/url"}
     />
   );
 }

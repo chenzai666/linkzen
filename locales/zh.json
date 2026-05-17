@@ -609,7 +609,8 @@
     "Resources": "资源管理",
     "App Configs": "全局配置",
     "Plans": "配额设置",
-    "List": "用户链接"
+    "List": "用户链接",
+    "Link Check": "链接检测"
   },
   "Email": {
     "Search emails": "搜索邮箱...",
