@@ -23,51 +23,51 @@ export default async function LoginPage() {
   }
   const t = await getTranslations("Auth");
   return (
-    <div className="flex h-full flex-col items-center justify-center">
+    <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+      {/* 移动端返回按钮 */}
       <Link
         href="/"
         className={cn(
           buttonVariants({ variant: "outline", size: "sm" }),
-          "absolute left-4 top-4 md:left-8 md:top-8 lg:hidden",
+          "absolute left-4 top-4 lg:hidden",
         )}
       >
-        <>
-          <Icons.chevronLeft className="mr-2 size-4" />
-          {t("Back")}
-        </>
+        <Icons.chevronLeft className="mr-2 size-4" />
+        {t("Back")}
       </Link>
-      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
-        <div className="flex flex-col space-y-2 text-center">
-          {/* <Icons.logo className="mx-auto size-12 lg:hidden" /> */}
-          <div className="text-2xl font-semibold tracking-tight">
-            <span>{t("Welcome to")}</span>{" "}
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {t("Choose your login method to continue")}
-          </p>
-        </div>
-        <Suspense>
-          <UserAuthForm />
-        </Suspense>
 
-        <p className="px-2 text-center text-sm text-muted-foreground">
-          {t("By clicking continue, you agree to our")}{" "}
-          <Link
-            href="/terms"
-            className="hover:text-brand underline underline-offset-4"
-          >
-            {t("Terms of Service")}
-          </Link>{" "}
-          {t("and")}{" "}
-          <Link
-            href="/privacy"
-            className="hover:text-brand underline underline-offset-4"
-          >
-            {t("Privacy Policy")}
-          </Link>
-          .
+      <div className="flex flex-col space-y-2 text-center">
+        {/* 移动端 Logo */}
+        <Icons.logo className="mx-auto size-10 lg:hidden" />
+        <div className="text-2xl font-semibold tracking-tight">
+          {t("Welcome to")} {siteConfig.name}
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {t("Choose your login method to continue")}
         </p>
       </div>
+
+      <Suspense>
+        <UserAuthForm />
+      </Suspense>
+
+      <p className="px-2 text-center text-sm text-muted-foreground">
+        {t("By clicking continue, you agree to our")}{" "}
+        <Link
+          href="/terms"
+          className="hover:text-brand underline underline-offset-4"
+        >
+          {t("Terms of Service")}
+        </Link>{" "}
+        {t("and")}{" "}
+        <Link
+          href="/privacy"
+          className="hover:text-brand underline underline-offset-4"
+        >
+          {t("Privacy Policy")}
+        </Link>
+        .
+      </p>
     </div>
   );
 }
