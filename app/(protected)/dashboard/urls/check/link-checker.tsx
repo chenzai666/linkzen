@@ -10,8 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Modal } from "@/components/ui/modal";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import UserUrlMetaInfo from "@/app/(protected)/dashboard/urls/meta";
 import {
   Table,
   TableBody,
@@ -87,6 +89,8 @@ export default function LinkChecker({ user, action }: LinkCheckerProps) {
   const [activeTab, setActiveTab] = useState("failed");
   const [timeout, setTimeout] = useState(6);
   const [batchSize, setBatchSize] = useState(6);
+  const [statsId, setStatsId] = useState<string | null>(null);
+  const [showStats, setShowStats] = useState(false);
   const stopRef = useRef(false);
 
   const { data, isLoading } = useSWR<{ total: number; list: ShortUrlFormData[] }>(
@@ -365,15 +369,13 @@ export default function LinkChecker({ user, action }: LinkCheckerProps) {
                             <Icons.outLink className="size-3" />
                             原链接
                           </Link>
-                          <Link
-                            href={r.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                          <button
+                            onClick={() => { setStatsId(r.id); setShowStats(true); }}
                             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
                           >
-                            <Icons.link className="size-3" />
+                            <Icons.lineChart className="size-3" />
                             详情
-                          </Link>
+                          </button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -434,6 +436,19 @@ export default function LinkChecker({ user, action }: LinkCheckerProps) {
       <p className="text-right text-xs text-muted-foreground">
         共 {data?.total ?? allLinks.length} 条链接
       </p>
+
+      <Modal showModal={showStats} setShowModal={setShowStats}>
+        <div className="p-4">
+          <h3 className="mb-4 text-base font-semibold">访问统计</h3>
+          {statsId && (
+            <UserUrlMetaInfo
+              user={{ id: user.id, name: "" }}
+              action="/api/url/meta"
+              urlId={statsId}
+            />
+          )}
+        </div>
+      </Modal>
     </div>
   );
 }
