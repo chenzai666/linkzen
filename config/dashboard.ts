@@ -18,6 +18,7 @@ export const sidebarLinks: SidebarNavItem[] = [
           { href: "/dashboard/urls/api", title: "API" },
         ],
       },
+      { href: "/dashboard/urls/check", icon: "shieldCheck", title: "Link Check" },
       { href: "/dashboard/records", icon: "globe", title: "DNS Records" },
     ],
   },
