@@ -4,14 +4,19 @@ import * as React from "react";
 import { useState } from "react";
 import Link from "next/link";
 import { UrlMeta, User } from "@prisma/client";
-import {
-  VisSingleContainer,
-  VisTooltip,
-  VisTopoJSONMap,
-} from "@unovis/react";
+import dynamic from "next/dynamic";
 import { TopoJSONMap } from "@unovis/ts";
-import { WorldMapTopoJSON } from "@unovis/ts/maps";
 import { useTranslations } from "next-intl";
+
+// 懒加载世界地图（WorldMapTopoJSON 约 2MB，避免阻塞首屏）
+const WorldMap = dynamic(() => import("./world-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[180px] items-center justify-center text-sm text-muted-foreground">
+      加载地图中…
+    </div>
+  ),
+});
 import { Flame, MousePointerClick, Users } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
@@ -490,13 +495,11 @@ export function DailyPVUVChart({
         <div className="lg:col-span-8">
           <Card>
             <CardContent className="p-3">
-              <VisSingleContainer
-                data={{ areas: areaData }}
-                width={wrapperWidth > 0 ? wrapperWidth * 0.65 : 400}
-              >
-                <VisTopoJSONMap topojson={WorldMapTopoJSON} />
-                <VisTooltip triggers={triggers} />
-              </VisSingleContainer>
+              <WorldMap
+                areaData={areaData}
+                triggers={triggers}
+                width={wrapperWidth}
+              />
             </CardContent>
           </Card>
         </div>

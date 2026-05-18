@@ -2,6 +2,13 @@
 
 import { motion } from "framer-motion";
 
+// 固定时长数组，避免 Math.random() 在服务端/客户端产生不同值导致水合错误
+const DURATIONS = [
+  20, 22, 25, 21, 28, 24, 26, 23, 27, 20, 29, 22, 25, 21, 28,
+  24, 26, 23, 27, 20, 29, 22, 25, 21, 28, 24, 26, 23, 27, 20,
+  29, 22, 25, 21, 28, 24,
+];
+
 function FloatingPaths({ position }: { position: number }) {
   const paths = Array.from({ length: 36 }, (_, i) => ({
     id: i,
@@ -38,7 +45,7 @@ function FloatingPaths({ position }: { position: number }) {
               pathOffset: [0, 1, 0],
             }}
             transition={{
-              duration: 20 + Math.random() * 10,
+              duration: DURATIONS[path.id % DURATIONS.length],
               repeat: Number.POSITIVE_INFINITY,
               ease: "linear",
             }}
