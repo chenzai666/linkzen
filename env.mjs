@@ -8,6 +8,7 @@ export const env = createEnv({
     DATABASE_URL: z.string().optional(),
     SCREENSHOTONE_BASE_URL: z.string().optional(),
     GITHUB_TOKEN: z.string().optional(),
+    APP_NAME: z.string().optional(),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.string().optional(),
@@ -21,5 +22,6 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_NAME: process.env.NEXT_PUBLIC_APP_NAME,
     SCREENSHOTONE_BASE_URL: process.env.SCREENSHOTONE_BASE_URL,
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
+    APP_NAME: process.env.APP_NAME ?? process.env.NEXT_PUBLIC_APP_NAME,
   },
 });

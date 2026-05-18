@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
 import { auth } from "@/auth";
+import { env } from "@/env.mjs";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
@@ -22,6 +23,7 @@ export default async function LoginPage() {
     redirect("/dashboard");
   }
   const t = await getTranslations("Auth");
+  const appName = env.APP_NAME || siteConfig.name;
   return (
     <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
       {/* 移动端返回按钮 */}
@@ -40,7 +42,7 @@ export default async function LoginPage() {
         {/* 移动端 Logo */}
         <Icons.logo className="mx-auto size-10 lg:hidden" />
         <div className="text-2xl font-semibold tracking-tight">
-          {t("Welcome to")} {siteConfig.name}
+          {t("Welcome to")} {appName}
         </div>
         <p className="text-sm text-muted-foreground">
           {t("Choose your login method to continue")}

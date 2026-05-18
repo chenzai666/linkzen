@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
+import { env } from "@/env.mjs";
 import { siteConfig } from "@/config/site";
 import { getCurrentUser } from "@/lib/session";
 import { BackgroundPaths } from "@/components/ui/background-paths";
@@ -15,6 +16,7 @@ interface AuthLayoutProps {
 export default async function AuthLayout({ children }: AuthLayoutProps) {
   const user = await getCurrentUser();
   const t = await getTranslations("Auth");
+  const appName = env.APP_NAME || siteConfig.name;
 
   if (user) {
     if (user.role === "ADMIN") redirect("/admin");
@@ -31,7 +33,7 @@ export default async function AuthLayout({ children }: AuthLayoutProps) {
         <h1 className="z-10 flex items-center gap-3 text-2xl font-semibold duration-1000 animate-in fade-in">
           <Icons.logo className="size-8" />
           <Link href="/" style={{ fontFamily: "Bahamas Bold" }}>
-            {siteConfig.name}
+            {appName}
           </Link>
         </h1>
         <div className="flex-1" />

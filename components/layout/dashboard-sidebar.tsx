@@ -11,6 +11,7 @@ import pkg from "package.json";
 
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
+import { useAppName } from "@/components/providers/app-name-provider";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ interface DashboardSidebarProps {
 export function DashboardSidebar({ links }: DashboardSidebarProps) {
   const t = useTranslations("System");
   const path = usePathname();
+  const appName = useAppName();
 
   const { isTablet } = useMediaQuery();
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(!isTablet);
@@ -235,7 +237,7 @@ export function DashboardSidebar({ links }: DashboardSidebarProps) {
                       style={{ fontFamily: "Bahamas Bold" }}
                       className="text-2xl font-bold"
                     >
-                      {siteConfig.name}
+                      {appName}
                     </Link>
                   </>
                 )}
@@ -293,7 +295,7 @@ export function DashboardSidebar({ links }: DashboardSidebarProps) {
                     rel="noreferrer"
                     className="font-medium underline-offset-2 hover:underline"
                   >
-                    {siteConfig.name}
+                    {appName}
                   </Link>
                   <Link
                     href={`${siteConfig.links.github}/releases/latest`}
@@ -321,6 +323,7 @@ export function MobileSheetSidebar({ links }: DashboardSidebarProps) {
   );
   const { isSm, isMobile } = useMediaQuery();
   const t = useTranslations("System");
+  const appName = useAppName();
 
   const toggleCollapsible = (itemTitle: string) => {
     setOpenCollapsibles((prev) => {
@@ -451,7 +454,7 @@ export function MobileSheetSidebar({ links }: DashboardSidebarProps) {
                     style={{ fontFamily: "Bahamas Bold" }}
                     className="pt-0.5 text-xl font-bold"
                   >
-                    {siteConfig.name}
+                    {appName}
                   </span>
                 </Link>
 
@@ -482,7 +485,7 @@ export function MobileSheetSidebar({ links }: DashboardSidebarProps) {
                     rel="noreferrer"
                     className="font-medium underline-offset-2 hover:underline"
                   >
-                    {siteConfig.name}
+                    {appName}
                   </Link>
                   <Link
                     href={`${siteConfig.links.github}/releases/latest`}

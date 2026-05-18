@@ -1,7 +1,10 @@
 import { redirect } from "next/navigation";
 
+import { env } from "@/env.mjs";
+import { siteConfig } from "@/config/site";
 import { sidebarLinks } from "@/config/dashboard";
 import { getCurrentUser } from "@/lib/session";
+import { AppNameProvider } from "@/components/providers/app-name-provider";
 import { SearchCommand } from "@/components/dashboard/search-command";
 import {
   DashboardSidebar,
@@ -28,7 +31,10 @@ export default async function Dashboard({ children }: ProtectedLayoutProps) {
     ),
   }));
 
+  const appName = env.APP_NAME || siteConfig.name;
+
   return (
+    <AppNameProvider name={appName}>
     <div className="relative flex min-h-screen w-full">
       <DashboardSidebar links={filteredLinks} />
 
@@ -54,5 +60,6 @@ export default async function Dashboard({ children }: ProtectedLayoutProps) {
         </main>
       </div>
     </div>
+    </AppNameProvider>
   );
 }
