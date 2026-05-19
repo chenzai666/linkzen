@@ -95,6 +95,9 @@ export async function GET(req: Request) {
       records: combinedData.reduce((acc, curr) => acc + curr.records, 0),
       urls: combinedData.reduce((acc, curr) => acc + curr.urls, 0),
       users: combinedData.reduce((acc, curr) => acc + curr.users, 0),
+      emails: 0,
+      inbox: 0,
+      sends: 0,
     };
 
     const prevTotal = {
@@ -116,6 +119,9 @@ export async function GET(req: Request) {
         prevTotal.users === 0
           ? total.users > 0 ? 100 : 0
           : ((total.users - prevTotal.users) / prevTotal.users) * 100,
+      emails: 0,
+      inbox: 0,
+      sends: 0,
     };
 
     return Response.json({
